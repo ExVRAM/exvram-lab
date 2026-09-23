@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ExVRAM Lab research record",
+  "type": "object",
+  "required": ["schema_version", "experiment_id", "phase", "status", "backend", "model_id"],
+  "properties": {
+    "schema_version": {"type": "integer", "const": 1},
+    "experiment_id": {"type": "string", "minLength": 1},
+    "phase": {"type": "string", "enum": ["P1", "P2", "P3"]},
+    "status": {"type": "string", "enum": ["PLANNED", "RUNNING", "PASS", "FAIL", "INCONCLUSIVE"]},
+    "backend": {"type": "string", "minLength": 1},
+    "model_id": {"type": "string", "minLength": 1},
+    "artifact_ref": {"type": "string"},
+    "metrics": {"type": "object"},
+    "quality_gate": {"type": "object"},
+    "notes": {"type": "array", "items": {"type": "string"}}
+  },
+  "additionalProperties": true
+}

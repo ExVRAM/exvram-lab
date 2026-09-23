@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://exvram.dev/schemas/layer_benchmark.schema.json",
+  "title": "ExVRAM layer benchmark record",
+  "type": "object",
+  "required": ["schema_version", "benchmark_kind", "synthetic", "measurement_status", "backend", "layer", "hardware", "metrics"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "benchmark_kind": {"const": "layer_microbenchmark"},
+    "synthetic": {"const": false},
+    "measurement_status": {"enum": ["measured", "unavailable", "unsupported", "not_applicable", "not_exercised"]},
+    "timestamp_utc": {"type": "string", "format": "date-time"},
+    "backend": {"type": "string", "minLength": 1},
+    "upstream_revision_tested": {"type": ["string", "null"]},
+    "layer": {"type": "object"},
+    "batch_size": {"type": "integer", "minimum": 1},
+    "warmup": {"type": "integer", "minimum": 0},
+    "repeats": {"type": "integer", "minimum": 0},
+    "hardware": {"type": "object"},
+    "metrics": {"type": "object"},
+    "correctness": {"type": "object"},
+    "notes": {"type": "array", "items": {"type": "string"}},
+    "error": {"type": "string"}
+  },
+  "additionalProperties": true
+}

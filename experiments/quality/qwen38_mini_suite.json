@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "suite_id": "qwen38-text-mini-v1",
+  "model_id": "Qwen3.8-27B",
+  "mode": "text_only_input",
+  "seed": 17,
+  "decode": {
+    "temperature": 0.0,
+    "top_p": 1.0,
+    "max_new_tokens": 64
+  },
+  "acceptance": {
+    "max_reference_logit_delta": 0.15,
+    "max_perplexity_relative_delta": 0.05,
+    "min_exact_match_fraction": 0.8
+  },
+  "prompts": [
+    {
+      "id": "fact_arithmetic",
+      "text": "Compute 37 * 19 and answer with the integer only.",
+      "expected": "703"
+    },
+    {
+      "id": "short_reasoning",
+      "text": "A box has 4 rows of 7 red balls and 3 blue balls. How many balls are there?",
+      "expected": "31"
+    },
+    {
+      "id": "structured_output",
+      "text": "Return exactly the JSON object {\"status\":\"ok\",\"count\":3}.",
+      "expected": "{\"status\":\"ok\",\"count\":3}"
+    },
+    {
+      "id": "language_fidelity",
+      "text": "Ответь одним коротким предложением по-русски: почему сжатие весов экономит VRAM?",
+      "expected": ""
+    }
+  ],
+  "status": "PLANNED",
+  "notes": [
+    "Prompts are a deterministic smoke suite, not a broad model-quality benchmark.",
+    "Reference outputs and measured candidate records must be stored before a PASS is claimed."
+  ]
+}

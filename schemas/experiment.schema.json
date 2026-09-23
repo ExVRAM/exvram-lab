@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://exvram.dev/schemas/experiment.schema.json",
+  "title": "ExVRAM experiment configuration or matrix",
+  "oneOf": [
+    {"$ref": "#/$defs/experiment"},
+    {
+      "type": "object",
+      "required": ["schema_version", "experiments"],
+      "properties": {
+        "schema_version": {"const": 1},
+        "matrix_name": {"type": "string"},
+        "description": {"type": "string"},
+        "experiments": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "#/$defs/experiment"}
+        }
+      },
+      "additionalProperties": false
+    }
+  ],
+  "$defs": {
+    "experiment": {
+      "type": "object",
+      "required": ["id", "adapter", "model", "vram_gib", "context_tokens", "batch_size", "weight_bits"],
+      "properties": {
+        "schema_version": {"const": 1},
+        "id": {"type": "string", "minLength": 1},
+        "adapter": {"type": "string", "minLength": 1},
+        "candidate_adapters": {"type": "array", "items": {"type": "string"}},
+        "model": {
+          "type": "object",
+          "required": ["name", "params_b", "layers", "kv_heads", "head_dim"],
+          "properties": {
+            "name": {"type": "string", "minLength": 1},
+            "params_b": {"type": "number", "exclusiveMinimum": 0},
+            "layers": {"type": "integer", "exclusiveMinimum": 0},
+            "kv_heads": {"type": "integer", "exclusiveMinimum": 0},
+            "head_dim": {"type": "integer", "exclusiveMinimum": 0},
+            "weight_group_size": {"type": "integer", "exclusiveMinimum": 0},
+            "scale_dtype_bytes": {"type": "integer", "exclusiveMinimum": 0},
+            "input_embedding_params_b": {"type": "number", "minimum": 0},
+            "input_embedding_bits": {"type": "number", "exclusiveMinimum": 0},
+            "lm_head_params_b": {"type": "number", "minimum": 0},
+            "lm_head_bits": {"type": "number", "exclusiveMinimum": 0},
+            "small_tensors_mib": {"type": "number", "minimum": 0},
+            "codebook_mib": {"type": "number", "minimum": 0}
+          },
+          "additionalProperties": false
+        },
+        "vram_gib": {"type": "number", "exclusiveMinimum": 0},
+        "context_tokens": {"type": "integer", "exclusiveMinimum": 0},
+        "batch_size": {"type": "integer", "exclusiveMinimum": 0},
+        "weight_bits": {"type": "number", "exclusiveMinimum": 0},
+        "kv_dtype_bytes": {"type": "number", "exclusiveMinimum": 0},
+        "overhead_fraction": {"type": "number", "minimum": 0, "exclusiveMaximum": 1},
+        "target_toks_s": {"type": "number", "exclusiveMinimum": 0},
+        "target_peak_vram_gib": {"type": "number", "exclusiveMinimum": 0},
+        "kv_layer_types": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["name", "fraction"],
+            "properties": {
+              "name": {"type": "string", "minLength": 1},
+              "fraction": {"type": "number", "exclusiveMinimum": 0}
+            },
+            "additionalProperties": false
+          }
+        },
+        "notes": {"type": "array", "items": {"type": "string"}},
+        "seed": {"type": "integer"}
+      },
+      "additionalProperties": false
+    }
+  }
+}

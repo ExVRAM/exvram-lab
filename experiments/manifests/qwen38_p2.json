@@ -1,0 +1,78 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-09-23",
+  "research_mode": "text_only_input_no_image",
+  "model": {
+    "id": "Qwen3.8-27B",
+    "source_url": "https://huggingface.co/Qwen/Qwen3.8-27B",
+    "revision": "1d4bf0f2ff6012fd82039f2fa52739d0dd7c60c0",
+    "license": "Apache-2.0",
+    "architecture_note": "Native vision-language checkpoint with hybrid GDN/attention trunk and MTP; text-only means no image input, not a text-only architecture.",
+    "target": {
+      "gpu": "NVIDIA RTX 5060 8 GB",
+      "compute_capability": "12.0",
+      "context_tokens": 8192,
+      "batch_size": 1,
+      "decode_tokens_per_second": 25
+    }
+  },
+  "candidates": [
+    {
+      "id": "thelastspark/Qwen3.8-27B-exl3@4.00bpw",
+      "backend": "exllamav3",
+      "source_url": "https://huggingface.co/thelastspark/Qwen3.8-27B-exl3/tree/4.00bpw",
+      "revision": "04a468b234ed309ef46b098b3451942f08333af1",
+      "license": "Apache-2.0",
+      "bytes": 16860809795,
+      "files": [
+        {
+          "name": "model-00001-of-00002.safetensors",
+          "bytes": 8471336006,
+          "sha256": "4fe8d96bc930599ef89571e7a3019f691f97ae12d8433a4eacbe863e51ef722b"
+        },
+        {
+          "name": "model-00002-of-00002.safetensors",
+          "bytes": 8389473789,
+          "sha256": "c1bde40f74b23acc500d75652f2be77c05260e38c779f246b41d8372b108a60a"
+        }
+      ],
+      "physical_bpw_claim": 4.0,
+      "compatibility": "installed_exllamav3_1.5.1_contains_qwen3_5_architecture",
+      "component_policy": "load text component; do not claim vision/MTP removal without a measured component map"
+    },
+    {
+      "id": "bartowski/Qwen3.8-27B-GGUF@IQ2_XXS",
+      "backend": "llamacpp",
+      "source_url": "https://huggingface.co/bartowski/Qwen3.8-27B-GGUF/blob/main/Qwen3.8-27B-IQ2_XXS.gguf",
+      "revision": "0c92138c51f112d2f0dc84d5f6d1ebe4b9912b9a",
+      "license": "artifact_terms_unspecified_base_model_apache_2_0",
+      "bytes": 8881268448,
+      "sha256": "9f8327b475beeb313977f9e4ca51507f60d61f0e4d0248037e0b524a92bbbe7f",
+      "physical_bpw_claim": 2.56,
+      "compatibility": "llama_cpp_b10896_or_newer_required; official_b10964_binary_staged",
+      "component_policy": "text-only input; quantizer card retains optional multimodal/MTP support"
+    },
+    {
+      "id": "ggml-org/Qwen3.8-27B-GGUF@Q4_K_M",
+      "backend": "llamacpp",
+      "source_url": "https://huggingface.co/ggml-org/Qwen3.8-27B-GGUF",
+      "revision": "efbb3b1f70a21d97fd4495240648405f7228554f",
+      "license": "Apache-2.0",
+      "bytes": 18973870528,
+      "physical_bpw_claim": 5.62,
+      "compatibility": "requires_official_llama_cpp_cuda13_runtime_and_qwen3_8_support_check",
+      "component_policy": "text-only input; official repository retains separate mmproj and MTP artifacts"
+    },
+    {
+      "id": "ji-farthing/Qwen3.8-27B-ik-llama-GGUF@IQ3_XXS",
+      "backend": "ik_llama_cpp",
+      "source_url": "https://huggingface.co/ji-farthing/Qwen3.8-27B-ik-llama-GGUF",
+      "revision": "71d2f1545124b8b52b131ab4de95ce359d36b87c",
+      "license": "Apache-2.0",
+      "bytes": 10868954784,
+      "physical_bpw_claim": 3.24,
+      "compatibility": "fork_specific_format_unverified_on_stock_llama_cpp",
+      "component_policy": "text-only conversion; use only if the matching ik_llama runtime is explicitly available"
+    }
+  ]
+}

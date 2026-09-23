@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://exvram.dev/schemas/result.schema.json",
+  "title": "ExVRAM benchmark result",
+  "type": "object",
+  "required": ["schema_version", "benchmark_id", "benchmark_kind", "synthetic", "timestamp_utc", "config", "hardware", "metrics", "quality_gate"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "benchmark_id": {"type": "string", "minLength": 1},
+    "benchmark_kind": {"type": "string", "minLength": 1},
+    "synthetic": {"type": "boolean"},
+    "timestamp_utc": {"type": "string", "format": "date-time"},
+    "config": {"type": "object"},
+    "hardware": {"type": "object"},
+    "metrics": {"type": "object"},
+    "quality_gate": {"type": "object"},
+    "notes": {"type": "array", "items": {"type": "string"}}
+  },
+  "additionalProperties": false
+}
