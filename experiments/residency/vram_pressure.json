@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "experiment_id": "vram-pressure-rtx5060-v1",
+  "experiment_kind": "VRAM_PRESSURE",
+  "status": "PLANNED",
+  "hardware": {
+    "device": "NVIDIA RTX 5060",
+    "target_peak_vram_gib": 7.5
+  },
+  "model_id": "Qwen3.8-27B",
+  "candidate_contexts": [128, 2048, 8192],
+  "usable_vram_gib_levels": [7.0, 7.3, 7.5, 7.7],
+  "metrics": [
+    "persistent_vram_mib",
+    "peak_vram_mib",
+    "free_vram_mib",
+    "decode_tokens_per_second",
+    "prefill_tokens_per_second",
+    "allocation_failure",
+    "stability"
+  ],
+  "execution_policy": {
+    "controlled_allocation_only": true,
+    "one_run_at_a_time": true,
+    "bounded_timeout_seconds": 180,
+    "stable_storage_required": true,
+    "stop_on_driver_or_system_lag": true
+  }
+}

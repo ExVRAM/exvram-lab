@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://exvram.dev/schemas/search.schema.json",
+  "title": "ExVRAM bounded configuration search",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "search_id",
+    "model_id",
+    "base_config",
+    "backends",
+    "quant_bits",
+    "contexts",
+    "kv_precisions",
+    "residency",
+    "runtime_profiles",
+    "policy"
+  ],
+  "properties": {
+    "schema_version": {"const": 1},
+    "search_id": {"type": "string", "minLength": 1},
+    "model_id": {"type": "string", "minLength": 1},
+    "base_config": {"type": "string", "minLength": 1},
+    "backends": {"type": "array", "items": {"type": "string"}, "minItems": 1},
+    "quant_bits": {"type": "array", "items": {"type": "number", "exclusiveMinimum": 0}, "minItems": 1},
+    "contexts": {"type": "array", "items": {"type": "integer", "exclusiveMinimum": 0}, "minItems": 1},
+    "target_context": {"type": "integer", "exclusiveMinimum": 0},
+    "target_decode_tokens_per_second": {"type": "number", "exclusiveMinimum": 0},
+    "target_peak_vram_gib": {"type": "number", "exclusiveMinimum": 0},
+    "quality_preference": {"type": "string", "minLength": 1},
+    "kv_precisions": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["name", "bytes_per_element"],
+        "properties": {
+          "name": {"type": "string", "minLength": 1},
+          "bytes_per_element": {"type": "number", "exclusiveMinimum": 0},
+          "backends": {"type": "array", "items": {"type": "string"}},
+          "support_status": {"type": "string"}
+        }
+      }
+    },
+    "residency": {"type": "array", "minItems": 1, "items": {"type": "object"}},
+    "runtime_profiles": {"type": "array", "minItems": 1, "items": {"type": "object"}},
+    "policy": {"type": "object"}
+  },
+  "additionalProperties": true
+}

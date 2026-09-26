@@ -13,6 +13,8 @@ model weights and external runtime binaries.
   lagging.
 - The P2 runners reject Windows removable-volume paths by default. `--allow-removable-storage`
   is an explicit opt-in for a controlled experiment, not a normal setting.
+- On this workstation `F:` reports `GetDriveTypeW` 3 (fixed) and still must be treated as
+  removable. Requantization paths stay on `E:`. See [REQUANT_DISK_PLAN.md](REQUANT_DISK_PLAN.md).
 
 ## Before a GPU run
 

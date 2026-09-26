@@ -1,0 +1,91 @@
+{
+  "schema_version": 1,
+  "search_id": "rtx5060-qwen38-27b-v1",
+  "model_id": "Qwen3.8-27B",
+  "base_config": "experiments/weights/qwen38_27b_bf16.json",
+  "backends": ["exllamav3", "llamacpp"],
+  "quant_bits": [2.0, 2.5, 3.0, 3.5, 4.0],
+  "contexts": [128, 2048, 8192],
+  "target_context": 8192,
+  "target_decode_tokens_per_second": 25,
+  "target_peak_vram_gib": 7.5,
+  "quality_preference": "measured_quality_first",
+  "kv_precisions": [
+    {
+      "name": "fp16",
+      "bytes_per_element": 2.0,
+      "backends": ["exllamav3", "llamacpp"],
+      "support_status": "baseline_or_documented"
+    },
+    {
+      "name": "q4",
+      "bytes_per_element": 0.5,
+      "backends": ["exllamav3", "llamacpp"],
+      "support_status": "runtime_validation_required"
+    }
+  ],
+  "residency": [
+    {
+      "name": "full_gpu",
+      "cpu_offload_mib": 0,
+      "support_status": "baseline"
+    },
+    {
+      "name": "minimal_offload",
+      "cpu_offload_mib": 256,
+      "support_status": "planned_offload_curve"
+    },
+    {
+      "name": "edge_offload",
+      "cpu_offload_mib": 512,
+      "support_status": "planned_offload_curve"
+    }
+  ],
+  "runtime_profiles": [
+    {
+      "name": "default",
+      "backends": ["exllamav3", "llamacpp"],
+      "options": {
+        "flash_attention": null,
+        "cuda_graphs": null,
+        "batch": 1,
+        "ubatch": null,
+        "threads": null,
+        "mmap": true,
+        "mlock": false
+      }
+    },
+    {
+      "name": "decode_tuned",
+      "backends": ["llamacpp"],
+      "options": {
+        "flash_attention": true,
+        "cuda_graphs": false,
+        "batch": 1,
+        "ubatch": 128,
+        "threads": 8,
+        "mmap": true,
+        "mlock": false
+      }
+    },
+    {
+      "name": "cache_tuned",
+      "backends": ["exllamav3"],
+      "options": {
+        "flash_attention": true,
+        "cuda_graphs": true,
+        "batch": 1,
+        "ubatch": null,
+        "threads": null,
+        "mmap": null,
+        "mlock": null
+      }
+    }
+  ],
+  "policy": {
+    "screen_quant_bits": [2.0, 4.0],
+    "screen_contexts": [128],
+    "max_candidates": 32,
+    "expand_top_n": 2
+  }
+}

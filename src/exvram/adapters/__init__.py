@@ -1,4 +1,4 @@
-from . import bitnet, cutlass, exllamav3, gemlite, llamacpp
+from . import bitnet, cutlass, exllamav3, gemlite, llamacpp, ollama
 from .base import AdapterProtocol, ExternalAdapter
 from .registry import all_adapters, get_adapter
 
@@ -12,4 +12,5 @@ __all__ = [
     "exllamav3",
     "gemlite",
     "llamacpp",
+    "ollama",
 ]

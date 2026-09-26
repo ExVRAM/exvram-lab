@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "experiment_id": "offload-curve-qwen38-27b-v1",
+  "experiment_kind": "OFFLOAD_CURVE",
+  "status": "PLANNED",
+  "model_id": "Qwen3.8-27B",
+  "backends": ["exllamav3", "llamacpp"],
+  "contexts": [128, 2048, 8192],
+  "batch_size": 1,
+  "cpu_resident_weight_mib": [0, 128, 256, 512, 768],
+  "fixed_axes": {
+    "quality_gate": "same checkpoint and prompt suite",
+    "quantization": "one selected candidate at a time",
+    "kv_precision": "fixed per backend run",
+    "runtime_profile": "default before tuning"
+  },
+  "metrics": [
+    "decode_tokens_per_second",
+    "prefill_tokens_per_second",
+    "persistent_vram_mib",
+    "peak_vram_mib",
+    "host_resident_weight_mib",
+    "pcie_read_bytes",
+    "quality_gate",
+    "stability"
+  ],
+  "execution_policy": {
+    "one_run_at_a_time": true,
+    "bounded_timeout_seconds": 300,
+    "stable_storage_required": true,
+    "no_automatic_download": true,
+    "stop_on_system_lag": true
+  }
+}

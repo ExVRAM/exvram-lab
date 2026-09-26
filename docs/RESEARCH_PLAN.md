@@ -48,6 +48,33 @@ The P3 branch is selected from the measured P2 classification: A existing OSS su
 gap, C speed gap, D quality gap, or E multiple gaps. Until P2 has measured points, P3 remains
 planned rather than being silently optimized against a proxy.
 
+## Minimal-refusal track
+
+This track is parallel to P2/P3. It does not replace the FULL_GPU performance work, and it
+does not start with a new uncensoring algorithm or with SFT/RLHF/DPO.
+
+Order:
+
+1. Finish the current FULL_GPU 27B fit and measure decode.
+2. Keep the lowest acceptable low-bit representation for the official checkpoint.
+3. Use the published Heretic BF16 checkpoint `JonathanColetti/Qwen3.8-27B-Uncensored` as the
+   behaviour source. See [UNCENSORED_OSS_MATRIX.md](UNCENSORED_OSS_MATRIX.md).
+4. Requantize that BF16 checkpoint with llama.cpp, Unsloth, or ExLlamaV3. Do not abliterate
+   an already low-bit file. Disk placement is [REQUANT_DISK_PLAN.md](REQUANT_DISK_PLAN.md):
+   `E:` only. `F:` is removable on this machine even though Windows reports it as fixed.
+5. Compare the matched quant on VRAM, tok/s, 8k fit, refusal rate, over-refusal rate, and
+   capability. The scorecard is [UNCENSORED_PARETO.md](UNCENSORED_PARETO.md).
+
+The 2026-09-24 gate is `REQUANTIZATION_REQUIRED`. Heretic stays an external AGPL tool for a
+later re-export only if the published Coletti point fails a matched quality or refusal gate.
+Fine-tuning stays behind that measurement.
+
+`REFUSAL_RATE` is the fraction of refusals on sensitive and standard-refusal prompts.
+`OVERREFUSAL_RATE` is the fraction of refusals on neutral, benign-but-suspicious, and
+harmless-control prompts. Both come from supplied responses. A drop in refusal rate is not
+success by itself; the figure that matters is refusal reduction against measured capability
+loss.
+
 ## Backlog priority
 
 - P0: baselines and memory map.
@@ -56,3 +83,5 @@ planned rather than being silently optimized against a proxy.
 - P3: 8k context and the >=25 tok/s target after the measured gap is isolated.
 - P4: optional ExVRAM runtime/orchestrator only after P3 demonstrates that composing existing
   runtimes is not enough.
+- Minimal-refusal: requantize the published Heretic BF16 checkpoint at the matched quant.
+  No first-party abliteration unless that checkpoint fails a measured gate.

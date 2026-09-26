@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "matrix_name": "qwen38-27b-bf16-weight-map",
+  "description": "Dense checkpoint storage map derived from the published Qwen3.8-27B config and safetensors headers. It is not a VRAM fit or tok/s measurement.",
+  "experiments": [
+    {
+      "id": "qwen38-27b-bf16-weight-map",
+      "adapter": "exllamav3",
+      "candidate_adapters": ["gemlite", "cutlass", "llamacpp", "bitnet", "ollama"],
+      "model": {
+        "name": "Qwen3.8-27B",
+        "params_b": 27.781427952,
+        "layers": 64,
+        "kv_heads": 4,
+        "head_dim": 256,
+        "input_embedding_params_b": 1.2713984,
+        "input_embedding_bits": 16,
+        "lm_head_params_b": 1.2713984,
+        "lm_head_bits": 16,
+        "small_tensors_mib": 5.876434326171875,
+        "codebook_mib": 0
+      },
+      "vram_gib": 8,
+      "context_tokens": 8192,
+      "batch_size": 1,
+      "weight_bits": 16,
+      "kv_dtype_bytes": 2,
+      "overhead_fraction": 0.08,
+      "target_toks_s": 25,
+      "target_peak_vram_gib": 7.5,
+      "kv_layer_types": [
+        {"name": "full_attention", "fraction": 0.25},
+        {"name": "linear_attention", "fraction": 0.75}
+      ],
+      "notes": [
+        "Source: Qwen/Qwen3.8-27B revision 1d4bf0f2ff6012fd82039f2fa52739d0dd7c60c0.",
+        "Component counts come from safetensors header shapes, not from loading the checkpoint.",
+        "BF16 tensor bytes sum to 55562855904, matching the index metadata total_size.",
+        "codebook_mib is an explicit zero: the dense index has no codebook tensors.",
+        "48 of 64 text layers are linear attention. Their recurrent state is not given a byte formula.",
+        "This row does not claim 8k fit, quality, or 25 tok/s."
+      ]
+    }
+  ]
+}

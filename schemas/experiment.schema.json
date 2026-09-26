@@ -40,12 +40,20 @@
             "head_dim": {"type": "integer", "exclusiveMinimum": 0},
             "weight_group_size": {"type": "integer", "exclusiveMinimum": 0},
             "scale_dtype_bytes": {"type": "integer", "exclusiveMinimum": 0},
-            "input_embedding_params_b": {"type": "number", "minimum": 0},
+            "input_embedding_params_b": {
+              "anyOf": [{"type": "number", "minimum": 0}, {"type": "null"}]
+            },
             "input_embedding_bits": {"type": "number", "exclusiveMinimum": 0},
-            "lm_head_params_b": {"type": "number", "minimum": 0},
+            "lm_head_params_b": {
+              "anyOf": [{"type": "number", "minimum": 0}, {"type": "null"}]
+            },
             "lm_head_bits": {"type": "number", "exclusiveMinimum": 0},
-            "small_tensors_mib": {"type": "number", "minimum": 0},
-            "codebook_mib": {"type": "number", "minimum": 0}
+            "small_tensors_mib": {
+              "anyOf": [{"type": "number", "minimum": 0}, {"type": "null"}]
+            },
+            "codebook_mib": {
+              "anyOf": [{"type": "number", "minimum": 0}, {"type": "null"}]
+            }
           },
           "additionalProperties": false
         },

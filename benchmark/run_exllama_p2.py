@@ -23,6 +23,11 @@ def _parser() -> argparse.ArgumentParser:
     parser.add_argument("--decode-tokens", type=int, default=32)
     parser.add_argument("--gpu-split", default="7.0")
     parser.add_argument("--cache-quant", default=None)
+    parser.add_argument(
+        "--search-candidate-id",
+        default=None,
+        help="exact candidate identity from experiments/search/*.json",
+    )
     parser.add_argument("--output", required=True)
     parser.add_argument("--seed", type=int, default=17)
     parser.add_argument(
@@ -42,7 +47,7 @@ def _write(payload: dict[str, Any], output: str) -> None:
 
 
 def _record_base(args: argparse.Namespace) -> dict[str, Any]:
-    return {
+    record = {
         "schema_version": 1,
         "experiment_id": f"p2-exllamav3-exl3-4bpw-c{args.context}",
         "phase": "P2",
@@ -68,6 +73,9 @@ def _record_base(args: argparse.Namespace) -> dict[str, Any]:
             "Text-only input excludes image tokens but does not relabel the native checkpoint.",
         ],
     }
+    if args.search_candidate_id:
+        record["search_candidate_id"] = args.search_candidate_id
+    return record
 
 
 def _prompt_ids(tokenizer: Any, context: int):

@@ -14,6 +14,16 @@ def _load_llamacpp_runner():
     return module
 
 
+def _load_exllama_runner():
+    path = Path(__file__).parents[2] / "benchmark" / "run_exllama_p2.py"
+    spec = importlib.util.spec_from_file_location("run_exllama_p2", path)
+    if spec is None or spec.loader is None:
+        raise RuntimeError(f"cannot load runner from {path}")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
 class FullModelRunnerTests(unittest.TestCase):
     def test_llamacpp_perf_lines_are_parsed_into_explicit_metrics(self):
         runner = _load_llamacpp_runner()
@@ -71,6 +81,8 @@ class FullModelRunnerTests(unittest.TestCase):
                 "128",
                 "--output",
                 r"PROJECT:\blocked.jsonl",
+                "--search-candidate-id",
+                "rtx5060-27b-llamacpp-w2.0-c128-kv-fp16-residency-full_gpu-runtime-default",
             ]
         )
 
@@ -84,6 +96,32 @@ class FullModelRunnerTests(unittest.TestCase):
         self.assertEqual(record["status"], "INCONCLUSIVE")
         self.assertEqual(record["measurement_status"], "blocked")
         self.assertEqual(record["error_type"], "StorageSafetyError")
+        self.assertEqual(
+            record["search_candidate_id"],
+            "rtx5060-27b-llamacpp-w2.0-c128-kv-fp16-residency-full_gpu-runtime-default",
+        )
+
+    def test_exllama_record_preserves_exact_search_candidate_identity(self):
+        runner = _load_exllama_runner()
+        args = runner._parser().parse_args(
+            [
+                "--model-dir",
+                r"PROJECT:\models\qwen",
+                "--context",
+                "8192",
+                "--output",
+                r"PROJECT:\results.jsonl",
+                "--search-candidate-id",
+                "rtx5060-27b-exllamav3-w4.0-c8192-kv-q4-residency-edge_offload-runtime-cache_tuned",
+            ]
+        )
+
+        record = runner._record_base(args)
+
+        self.assertEqual(
+            record["search_candidate_id"],
+            "rtx5060-27b-exllamav3-w4.0-c8192-kv-q4-residency-edge_offload-runtime-cache_tuned",
+        )
 
 
 if __name__ == "__main__":

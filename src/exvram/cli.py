@@ -7,11 +7,21 @@ from pathlib import Path
 from typing import Any
 
 from .adapters import all_adapters, get_adapter
+from .adapters.ollama import run_ollama
 from .config import load_experiment
 from .errors import ExVRAMError
 from .hardware import detect_hardware
+from .heretic import plan_heretic
 from .layer_benchmark import DEFAULT_BACKENDS, DEFAULT_LAYER_SHAPES, run_layer_benchmark
 from .memory import compare_memory_configurations, estimate_memory
+from .optimizer import (
+    build_search_plan,
+    load_measurements,
+    load_search_space,
+    recommend_configurations,
+    write_json_payload,
+)
+from .refusal import load_refusal_jsonl, score_refusal
 from .research import (
     default_p2_queue,
     load_manifest,
@@ -61,6 +71,27 @@ def _parser() -> argparse.ArgumentParser:
     compare.add_argument("--config", help="JSON experiment config or matrix")
     compare.add_argument("--index", type=int, default=0)
 
+    search = commands.add_parser(
+        "plan-search", help="create a bounded adaptive configuration search plan"
+    )
+    search.add_argument(
+        "--config", default="experiments/search/rtx5060_27b_search.json"
+    )
+    search.add_argument("--base-config", help="override the search config base experiment")
+    search.add_argument("--results-dir", default="experiments/results")
+    search.add_argument("--stage", choices=("screen", "deep", "adaptive"), default="adaptive")
+    search.add_argument("--output", help="write the plan as JSON")
+
+    recommend = commands.add_parser(
+        "recommend-config", help="recommend configurations from measurements and modeled memory"
+    )
+    recommend.add_argument(
+        "--config", default="experiments/search/rtx5060_27b_search.json"
+    )
+    recommend.add_argument("--base-config", help="override the search config base experiment")
+    recommend.add_argument("--results-dir", default="experiments/results")
+    recommend.add_argument("--output", help="write recommendations as JSON")
+
     synthetic = commands.add_parser(
         "run-synthetic-microbenchmark", help="run the CPU-only synthetic workflow"
     )
@@ -91,6 +122,39 @@ def _parser() -> argparse.ArgumentParser:
     )
     layer.add_argument("--seed", type=int, default=17)
     layer.add_argument("--output", help="append raw result records to a JSONL path")
+
+    ollama = commands.add_parser(
+        "run-ollama", help="run one short smoke prompt through an already installed Ollama model"
+    )
+    ollama.add_argument("--model", default="qwen2.5-coder:7b")
+    ollama.add_argument(
+        "--prompt", default="Reply with one short sentence: ExVRAM smoke test ready."
+    )
+    ollama.add_argument("--executable", default="ollama")
+    ollama.add_argument("--keepalive", default="5m")
+    ollama.add_argument("--timeout", type=int, default=120)
+    ollama.add_argument("--output", help="write one JSON result or append to JSONL")
+
+    refusal = commands.add_parser(
+        "score-refusal",
+        help="score a local JSONL of responses for refusal and over-refusal rates",
+    )
+    refusal.add_argument(
+        "--input",
+        required=True,
+        help="JSONL with prompt_class and refused or response",
+    )
+
+    heretic = commands.add_parser(
+        "plan-heretic",
+        help="print an external Heretic command without executing it",
+    )
+    heretic.add_argument("--model", required=True)
+    heretic.add_argument(
+        "--evaluate-model",
+        help="score this checkpoint against --model; do not abliterate",
+    )
+    heretic.add_argument("--executable", default="heretic")
     return parser
 
 
@@ -208,6 +272,36 @@ def _compare_memory(args: argparse.Namespace) -> int:
     return 0
 
 
+def _optimizer_inputs(
+    args: argparse.Namespace,
+) -> tuple[object, object, object, list[dict[str, Any]]]:
+    space = load_search_space(args.config)
+    base_config = load_experiment(args.base_config or space.base_config)
+    hardware = detect_hardware()
+    records = load_measurements(args.results_dir)
+    return space, base_config, hardware, records
+
+
+def _plan_search(args: argparse.Namespace) -> int:
+    space, base_config, hardware, records = _optimizer_inputs(args)
+    payload = build_search_plan(
+        space, base_config, hardware, records, stage=args.stage
+    )
+    if args.output:
+        payload["saved_to"] = write_json_payload(payload, args.output)
+    _dump(payload)
+    return 0
+
+
+def _recommend_config(args: argparse.Namespace) -> int:
+    space, base_config, hardware, records = _optimizer_inputs(args)
+    payload = recommend_configurations(space, base_config, hardware, records)
+    if args.output:
+        payload["saved_to"] = write_json_payload(payload, args.output)
+    _dump(payload)
+    return 0
+
+
 def _run_synthetic(args: argparse.Namespace) -> int:
     config = load_experiment(args.config, args.index)
     hardware = detect_hardware()
@@ -271,6 +365,38 @@ def _run_layer(args: argparse.Namespace) -> int:
     return 0
 
 
+def _score_refusal(args: argparse.Namespace) -> int:
+    records = load_refusal_jsonl(Path(args.input).read_text(encoding="utf-8"))
+    _dump(score_refusal(records))
+    return 0
+
+
+def _plan_heretic(args: argparse.Namespace) -> int:
+    _dump(
+        plan_heretic(
+            args.model,
+            evaluate_model=args.evaluate_model,
+            executable=args.executable,
+        )
+    )
+    return 0
+
+
+def _run_ollama(args: argparse.Namespace) -> int:
+    record = run_ollama(
+        args.model,
+        args.prompt,
+        executable=args.executable,
+        timeout=args.timeout,
+        keepalive=args.keepalive,
+    )
+    saved_to = append_jsonl_payload(record, args.output) if args.output else None
+    if saved_to:
+        record["saved_to"] = saved_to
+    _dump(record)
+    return 0 if record["status"] == "PASS" else 2
+
+
 def main(argv: list[str] | None = None) -> int:
     args = _parser().parse_args(argv)
     try:
@@ -288,10 +414,20 @@ def main(argv: list[str] | None = None) -> int:
             return _plan_experiment(args)
         if args.command == "compare-memory-configurations":
             return _compare_memory(args)
+        if args.command == "plan-search":
+            return _plan_search(args)
+        if args.command == "recommend-config":
+            return _recommend_config(args)
         if args.command == "run-synthetic-microbenchmark":
             return _run_synthetic(args)
         if args.command == "run-layer-benchmark":
             return _run_layer(args)
+        if args.command == "run-ollama":
+            return _run_ollama(args)
+        if args.command == "score-refusal":
+            return _score_refusal(args)
+        if args.command == "plan-heretic":
+            return _plan_heretic(args)
         raise ExVRAMError(f"unknown command: {args.command}")
     except (ExVRAMError, ValueError, OSError) as exc:
         print(json.dumps({"error": str(exc), "type": type(exc).__name__}), file=sys.stderr)

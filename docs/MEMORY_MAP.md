@@ -2,8 +2,9 @@
 
 The planner's current legacy estimate is **8.319329 GiB**. It is a model-based estimate, not a
 driver allocation measurement. The default placeholder deliberately has no checkpoint manifest
-for embeddings, lm_head, small tensors, or codebooks, so those rows are explicit zeroes rather
-than invented sizes.
+for embeddings, lm_head, small tensors, or codebooks. Those rows are `unavailable`, not measured
+zeros. Analytic weight, scale, KV, and reserve rows are `modeled`. Because the default budget
+still contains unavailable rows, its total evidence status is `INCONCLUSIVE`.
 
 | Component | Theoretical / modeled GiB | Precision | Residency | Source | Movable/compressible |
 |---|---:|---|---|---|---|
@@ -66,3 +67,15 @@ bytes equal 2.500029 physical bpw. EXL3 K4 stores 8,388,608 trellis bytes plus 1
 sign/scale metadata, or 4.007813 physical bpw. These observations correct the corresponding
 layer representation only; they do not replace the full-model 8.319329 GiB planner total without
 real tensor shapes, group sizes, codebooks, KV policy and runtime residency data.
+
+## Qwen3.8-27B dense weight map
+
+`experiments/weights/qwen38_27b_bf16.json` records the published dense checkpoint, revision
+`1d4bf0f2ff6012fd82039f2fa52739d0dd7c60c0`. Embeddings, lm_head, small tensors, and codebooks
+are supplied. Codebooks are an explicit zero because the safetensors index has none. At 16-bit
+storage the weight rows sum to 55,562,855,904 bytes, the same `total_size` as the upstream index.
+That is checkpoint storage arithmetic, not a measurement of RTX 5060 residency.
+
+The text stack has 16 full-attention layers and 48 linear-attention layers. Only the full-attention
+slice uses the analytic KV formula. The linear-attention row stays `unavailable`, so the whole
+budget stays `INCONCLUSIVE`. No runtime allocator reading is attached to this map.

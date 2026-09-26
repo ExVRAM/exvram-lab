@@ -1,0 +1,43 @@
+recipe_version: 1
+name: rtx5060_8gb_qwen38_27b_full_gpu
+purpose: measured P4 GGUF FULL_GPU reproduction profile
+hardware:
+  gpu_name: NVIDIA GeForce RTX 5060
+  compute_capability: '12.0'
+  vram_mib: 8151
+model:
+  repo: unsloth/Qwen3.8-27B-GGUF
+  revision: 4ca720788d1e01f1bff70c033e0d0028fd02e502
+  file: Qwen3.8-27B-UD-IQ2_XXS.gguf
+  sha256: e792d8fb3142fe6d9171876d6da0f71f05a71028718debc72dbec93ff645e67d
+runtime:
+  backend: llamacpp
+  build: b10982
+  commit: fc82583e6
+  executable: .cache/llama/runtime-b10982-cuda13.4/llama-cli.exe
+  device: CUDA0
+  gpu_layers: 999
+  split_mode: none
+  fit: off
+  flash_attention: on
+  cache_type_k: q4_0
+  cache_type_v: q4_0
+  warmup: true
+  speculative_decoding: false
+  mtp: false
+  cpu_decoder_offload: false
+  logical_batch: 32
+  physical_batch: 1
+experiment:
+  requested_context: 128
+  observed_context: 256
+  predict_tokens: 300
+  prompt_tokens: 22
+  note: llama.cpp clamps the requested c128 profile to n_ctx=256 for this model; use the ctx512 control for a complete 256-generated-token pass.
+control:
+  context: 512
+  predict_tokens: 256
+  expected_generated_tokens: 256
+quality_gate:
+  status: NOT_RUN
+  reason: Full-model quality comparison is a later P2 gate.

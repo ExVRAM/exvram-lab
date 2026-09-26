@@ -7,11 +7,13 @@ from dataclasses import asdict, dataclass, replace
 from typing import Any
 
 from .contracts import ExperimentConfig
+from .errors import ExVRAMError
 
 GIB = 1024**3
 MIB = 1024**2
 
 # These shares reproduce the legacy 8% reserve. They are planning assumptions, not telemetry.
+EVIDENCE_STATUSES = ("measured", "synthetic", "modeled", "unavailable", "INCONCLUSIVE")
 OVERHEAD_SHARES = {
     "cuda_context": 0.1875,
     "allocator_reserve": 0.3125,
@@ -27,6 +29,29 @@ def _gib(byte_count: float) -> float:
     return byte_count / GIB
 
 
+def _optional_parameters(value: float | None) -> float:
+    if value is None:
+        return 0.0
+    return value * 1_000_000_000
+
+
+def _small_tensor_parameters(value: float | None) -> float:
+    if value is None:
+        return 0.0
+    return value * MIB / 2
+
+
+def _supplied_evidence(supplied: bool) -> str:
+    return "modeled" if supplied else "unavailable"
+
+
+def _budget_evidence(components: tuple[MemoryComponent, ...] | list[MemoryComponent]) -> str:
+    statuses = {component.evidence_status for component in components}
+    if statuses <= {"modeled"}:
+        return "modeled"
+    return "INCONCLUSIVE"
+
+
 @dataclass(frozen=True)
 class MemoryComponent:
     name: str
@@ -40,6 +65,7 @@ class MemoryComponent:
     movable_or_compressible: bool
     estimated_saving_gib: float
     notes: str
+    evidence_status: str = "modeled"
 
     def to_dict(self) -> dict[str, Any]:
         result = asdict(self)
@@ -62,6 +88,7 @@ class MemoryOptimization:
     upstream_projects: tuple[str, ...]
     source: str
     notes: str
+    evidence_status: str = "modeled"
 
     def to_dict(self) -> dict[str, Any]:
         result = asdict(self)
@@ -87,6 +114,7 @@ class MemoryBudget:
     legacy_modeled_total_gib: float
     assumptions: tuple[str, ...]
     components: tuple[MemoryComponent, ...]
+    evidence_status: str = "modeled"
 
     def to_dict(self) -> dict[str, Any]:
         result = asdict(self)
@@ -98,6 +126,10 @@ class MemoryBudget:
                 self.components, key=lambda component: component.modeled_bytes, reverse=True
             )
         ]
+        counts: dict[str, int] = {}
+        for component in self.components:
+            counts[component.evidence_status] = counts.get(component.evidence_status, 0) + 1
+        result["evidence_status_counts"] = counts
         return result
 
 
@@ -121,7 +153,10 @@ def _component(
     source: str,
     movable_or_compressible: bool,
     notes: str,
+    evidence_status: str = "modeled",
 ) -> MemoryComponent:
+    if evidence_status not in EVIDENCE_STATUSES:
+        raise ExVRAMError(f"unknown evidence_status {evidence_status}")
     return MemoryComponent(
         name=name,
         category=category,
@@ -134,15 +169,21 @@ def _component(
         movable_or_compressible=movable_or_compressible,
         estimated_saving_gib=0.0,
         notes=notes,
+        evidence_status=evidence_status,
     )
 
 
 def _weight_components(config: ExperimentConfig) -> tuple[list[MemoryComponent], float, float]:
     model = config.model
     total_parameters = model.params_b * 1_000_000_000
-    embedding_parameters = model.input_embedding_params_b * 1_000_000_000
-    lm_head_parameters = model.lm_head_params_b * 1_000_000_000
-    transformer_parameters = total_parameters - embedding_parameters - lm_head_parameters
+    embedding_parameters = _optional_parameters(model.input_embedding_params_b)
+    lm_head_parameters = _optional_parameters(model.lm_head_params_b)
+    small_parameters = _small_tensor_parameters(model.small_tensors_mib)
+    transformer_parameters = (
+        total_parameters - embedding_parameters - lm_head_parameters - small_parameters
+    )
+    if transformer_parameters < 0:
+        raise ExVRAMError("component parameter counts exceed model.params_b")
 
     transformer_raw, transformer_scales = _quantized_bytes(
         transformer_parameters, config.weight_bits, model.weight_group_size, model.scale_dtype_bytes
@@ -170,6 +211,7 @@ def _weight_components(config: ExperimentConfig) -> tuple[list[MemoryComponent],
             source,
             True,
             "Main transformer linear weights only; excludes scales and runtime padding.",
+            _supplied_evidence(transformer_parameters > 0),
         ),
         _component(
             "input_embeddings",
@@ -181,6 +223,7 @@ def _weight_components(config: ExperimentConfig) -> tuple[list[MemoryComponent],
             source,
             True,
             "Can be offloaded only if the selected runtime supports embedding residency changes.",
+            _supplied_evidence(model.input_embedding_params_b is not None),
         ),
         _component(
             "lm_head",
@@ -192,17 +235,19 @@ def _weight_components(config: ExperimentConfig) -> tuple[list[MemoryComponent],
             source,
             True,
             "Output projection; tied/untied status must come from a concrete checkpoint.",
+            _supplied_evidence(model.lm_head_params_b is not None),
         ),
         _component(
             "norms_biases_small_fp16",
             "small_tensors",
-            model.small_tensors_mib * MIB,
+            (model.small_tensors_mib or 0.0) * MIB,
             "FP16/FP32 small tensors",
             16.0,
             "VRAM",
-            "model manifest; default zero for placeholder model",
+            "model manifest; omitted means the checkpoint size was not supplied",
             True,
             "Needs checkpoint metadata for a non-zero estimate.",
+            _supplied_evidence(model.small_tensors_mib is not None),
         ),
         _component(
             "quantization_scales",
@@ -218,13 +263,14 @@ def _weight_components(config: ExperimentConfig) -> tuple[list[MemoryComponent],
         _component(
             "codebooks_metadata",
             "quantization_metadata",
-            model.codebook_mib * MIB,
+            (model.codebook_mib or 0.0) * MIB,
             "runtime metadata",
             None,
             "VRAM",
             "model manifest; default zero for placeholder model",
             True,
             "Runtime-specific codebooks and headers must be measured from artifacts.",
+            _supplied_evidence(model.codebook_mib is not None),
         ),
     ]
     return components, total_raw, total_scales
@@ -242,21 +288,39 @@ def _kv_components(config: ExperimentConfig) -> tuple[list[MemoryComponent], flo
         * config.batch_size
     )
     components: list[MemoryComponent] = []
+    counted_bytes = 0.0
     for name, fraction in config.kv_layer_types:
+        if name == "full_attention":
+            components.append(
+                _component(
+                    f"kv_cache_{name}",
+                    "kv_cache",
+                    total_bytes * fraction,
+                    f"{config.kv_dtype_bytes * 8:g}-bit KV",
+                    config.kv_dtype_bytes * 8,
+                    "VRAM",
+                    "analytic KV formula and configured layer-type fraction",
+                    True,
+                    "Quantization can change quality and attention kernel behavior.",
+                )
+            )
+            counted_bytes += total_bytes * fraction
+            continue
         components.append(
             _component(
                 f"kv_cache_{name}",
                 "kv_cache",
-                total_bytes * fraction,
-                f"{config.kv_dtype_bytes * 8:g}-bit KV",
-                config.kv_dtype_bytes * 8,
+                0.0,
+                "unspecified",
+                None,
                 "VRAM",
-                "analytic KV formula and configured layer-type fraction",
+                "no byte formula for this layer type",
                 True,
-                "Quantization can change quality and attention kernel behavior.",
+                "Hybrid or recurrent state is not estimated from the full-attention formula.",
+                "unavailable",
             )
         )
-    return components, total_bytes
+    return components, counted_bytes
 
 
 def _runtime_components(config: ExperimentConfig) -> list[MemoryComponent]:
@@ -328,8 +392,11 @@ def estimate_memory(config: ExperimentConfig) -> MemoryBudget:
         "scale metadata is approximated as one scale per configured weight group",
         "KV estimate uses 2 x layers x tokens x KV heads x head dimension x element bytes",
         "runtime reserve is a planning split of overhead_fraction, not a measurement",
-        "zero component sizes mean the placeholder model has no checkpoint manifest yet",
+        "small tensors are removed from packed weights at 2 bytes per element",
+        "evidence_status modeled is arithmetic; unavailable means a size was not supplied",
+        "a budget with any unavailable component is INCONCLUSIVE, not a measured fit",
     )
+    evidence_status = _budget_evidence(components)
     return MemoryBudget(
         vram_gib=config.vram_gib,
         target_peak_vram_gib=config.target_peak_vram_gib,
@@ -347,6 +414,7 @@ def estimate_memory(config: ExperimentConfig) -> MemoryBudget:
         legacy_modeled_total_gib=legacy_modeled_total,
         assumptions=assumptions,
         components=tuple(components),
+        evidence_status=evidence_status,
     )
 
 
@@ -391,12 +459,17 @@ def _make_option(
         upstream_projects=upstream_projects,
         source=source,
         notes=notes,
+        evidence_status=budget.evidence_status,
     )
 
 
 def _lm_head_saving(config: ExperimentConfig, target_bits: float) -> float:
     model = config.model
-    if model.lm_head_params_b <= 0 or target_bits >= model.lm_head_bits:
+    if (
+        model.lm_head_params_b is None
+        or model.lm_head_params_b <= 0
+        or target_bits >= model.lm_head_bits
+    ):
         return 0.0
     current_raw, current_scales = _quantized_bytes(
         model.lm_head_params_b * 1_000_000_000,
@@ -415,7 +488,11 @@ def _lm_head_saving(config: ExperimentConfig, target_bits: float) -> float:
 
 def _embedding_quantization_saving(config: ExperimentConfig, target_bits: float) -> float:
     model = config.model
-    if model.input_embedding_params_b <= 0 or target_bits >= model.input_embedding_bits:
+    if (
+        model.input_embedding_params_b is None
+        or model.input_embedding_params_b <= 0
+        or target_bits >= model.input_embedding_bits
+    ):
         return 0.0
     current_raw, current_scales = _quantized_bytes(
         model.input_embedding_params_b * 1_000_000_000,
@@ -606,4 +683,5 @@ def compare_memory_configurations(config: ExperimentConfig) -> dict[str, Any]:
         "baseline": budget.to_dict(),
         "options": [option.to_dict() for option in options],
         "combined_scenarios": [option.to_dict() for option in combinations],
+        "evidence_status": budget.evidence_status,
     }

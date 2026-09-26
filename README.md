@@ -2,7 +2,47 @@
 
 **Trading GPU compute for memory to run larger LLMs on smaller GPUs.**
 
-ExVRAM Lab is an open-source research environment for testing how low-bit representations, GPU-native reconstruction, memory hierarchy management, selective offload and existing inference runtimes can reduce VRAM requirements for local LLM inference.
+ExVRAM Lab is an open-source research project focused on running larger dense LLMs on memory-constrained consumer GPUs by combining ultra-low-bit representations, full-GPU residency, memory-aware runtime configuration and existing open-source inference technologies.
+
+Current verified milestone:
+
+- NVIDIA RTX 5060 8 GB
+- Qwen3.8-27B
+- 65/65 layers on CUDA
+- CPU decoder weight offload: 0
+- CUDA model buffer: 6521 MiB
+- peak VRAM: 7611 MiB
+- measured decode: 31.39 tok/s on the short-context benchmark
+- 8k context and final quality validation are still under investigation
+
+That short-context figure is the measured c256 decode from the FULL_GPU run. It is not an 8k result, not a quality result, and not a claim that the speed target is solved.
+
+## Research goals
+
+- Dense ~27B on 8 GB consumer GPU
+- Full GPU residency
+- 8k context
+- >=25 tok/s target
+- minimal measurable quality loss
+- minimal-refusal / steerable model variant
+- reuse mature OSS before custom kernels
+
+## Core principle
+
+Reuse mature open-source implementations first.
+
+Current upstream ecosystem includes:
+
+- ExLlamaV3
+- llama.cpp
+- GemLite
+- CUTLASS
+- BitNet
+- Marlin
+- FlashInfer
+- Ollama
+
+ExVRAM should only introduce custom low-level code after a measurable gap is demonstrated.
 
 Current research target:
 
@@ -13,8 +53,11 @@ Current research target:
 - Batch-1 interactive inference
 - Target: ≥25 tok/s where achievable
 - Quality loss must be measured, not assumed
+- Steerable, with substantially reduced built-in refusal behaviour (minimal-refusal)
 
-These are research targets. A number in this list is not a measured result unless [Current status](#current-status) says it was measured.
+These are research targets. A number in this list is not a measured result unless [Current status](#current-status) says it was measured. "Minimal-refusal" means a measured drop in refusal rate at a small measured capability cost. It does not mean the checkpoint is completely uncensored.
+
+ExVRAM aims for a local model that is large, fast, memory-efficient, steerable, and minimal-refusal. Model behaviour is a property of the weights. Any application restriction stays outside the weights, in a separate configurable policy. Runtime performance and that policy layer are not the same track.
 
 ## Why ExVRAM
 
@@ -31,11 +74,12 @@ Several of the techniques already exist. ExLlamaV3, GemLite, BitNet, llama.cpp, 
 3. Never confuse nominal bpw with physical bpw.
 4. Never report modeled results as measured.
 5. Custom kernels require a demonstrated gap.
-6. Quality, VRAM and speed are optimized together.
+6. Quality, VRAM, speed, and refusal rate are optimized together.
+7. Do not write a first-party uncensoring method while a ready abliterated checkpoint or an existing tool such as Heretic still applies.
 
 ## Current status
 
-Confirmed in this repository as of 2026-09-23:
+Confirmed in this repository as of 2026-09-25:
 
 - RTX 5060 8 GB detected: 8151 MiB reported by the driver, compute capability 12.0 / SM120.
 - Real CUDA layer microbenchmarks are recorded. They use generated matrices, not a full checkpoint.
@@ -43,8 +87,14 @@ Confirmed in this repository as of 2026-09-23:
 - GemLite W4 physical bpw measured around 4.50 (4.500029) for the tested layer representation.
 - ExLlamaV3 EXL3 K4 physical bpw measured around 4.01 (4.007813) for the tested representation.
 - One llama.cpp full-model smoke at context 128, batch 1, text-only, bartowski IQ2_XXS: prefill 31.3 tok/s and decode 3.8 tok/s. Quality was not run. This is not an 8k result and does not meet the 25 tok/s decode target.
+- Ollama installed-model smoke for `qwen2.5-coder:7b`: prefill 1399.5 tok/s and decode 45.8 tok/s on the detected RTX 5060. This is a 7B runtime baseline, not a 27B result; quality was not run.
 - ExLlamaV3 full-model attempts on the tested EXL3 artifact failed to fit; there is no successful ExLlamaV3 full-model tok/s.
+- P4 now contains one real IQ2_XXS Qwen3.8-27B `FULL_GPU_CONFIRMED` run: llama.cpp reported 65/65 layers on CUDA0, 31.39 tok/s at the runtime-clamped c256 profile, and 18.11 tok/s in a ctx512 control with 256 generated tokens. See [docs/FULL_GPU_27B.md](docs/FULL_GPU_27B.md), [docs/FULL_GPU_PROFILE.md](docs/FULL_GPU_PROFILE.md), and [experiments/results/p4_full_gpu_27b.jsonl](experiments/results/p4_full_gpu_27b.jsonl).
+- P5 now contains a standardized c256/512/1024/2048/4096/8192 curve plus q4/q8/f16 KV measurements at c2048 and c8192. The base q4 c8192 run reached 29.04 tok/s with 7641 MiB peak VRAM, but quality is still `NOT_RUN` and the point is provisional. See [docs/CONTEXT_SCALING.md](docs/CONTEXT_SCALING.md), [docs/KV_TRADEOFF.md](docs/KV_TRADEOFF.md), [docs/8K_PERFORMANCE.md](docs/8K_PERFORMANCE.md), and [recipes/rtx5060_8gb_qwen38_27b_8k.yaml](recipes/rtx5060_8gb_qwen38_27b_8k.yaml).
+- The uncensored 8k track has not been run. No uncensored artifact was downloaded, and no refusal-rate or quality result is claimed. See [docs/UNCENSORED_8K_RESULT.md](docs/UNCENSORED_8K_RESULT.md).
+- The requested c128 setting is currently clamped to actual n_ctx=256 by this llama.cpp/model combination. No 8k quality result is claimed; the quality gate remains NOT_RUN.
 - The full-model 27B / 8k / ≥25 tok/s target is still under investigation.
+- Minimal-refusal sources were inventoried on 2026-09-24. No uncensored checkpoint was loaded on this GPU. Refusal rate, quality delta, decode, and 8k fit for those files are not ExVRAM measurements. The decision gate is `REQUANTIZATION_REQUIRED`. See [docs/UNCENSORED_PARETO.md](docs/UNCENSORED_PARETO.md).
 
 Layer benchmarks are not full-model results. Nominal bits per weight are not physical bits per weight. Details are in [docs/P1_REAL_GPU_RESULTS.md](docs/P1_REAL_GPU_RESULTS.md), [docs/P2_RESULTS.md](docs/P2_RESULTS.md), and [docs/GPU_ENVIRONMENT.md](docs/GPU_ENVIRONMENT.md).
 
@@ -75,19 +125,22 @@ ExVRAM does not try to rewrite these projects from scratch:
 - [CUTLASS](https://github.com/NVIDIA/cutlass) — BSD-3-Clause for applicable core components; some files have separate NVIDIA terms
 - [BitNet](https://github.com/microsoft/BitNet) — MIT
 - [llama.cpp](https://github.com/ggml-org/llama.cpp) — MIT
+- [Ollama](https://github.com/ollama/ollama) — MIT CLI/runtime boundary; already-installed models only
 
 QTIP is a GPLv3 research reference only. No GPL code is copied into this Apache-2.0 repository. Upstream license checks for this publication are recorded in [THIRD_PARTY.md](THIRD_PARTY.md).
 
 ## Repository structure
 
 - `src/exvram/` — contracts, hardware detection, memory calculator, adapter registry, CLI, results.
+- `src/exvram/optimizer/` — bounded adaptive search and hardware-aware evidence-based recommendations.
 - `schemas/` — versioned experiment, result, and layer-benchmark JSON schemas.
-- `adapters/{exllamav3,gemlite,cutlass,bitnet,llamacpp}` — integration notes and boundaries. Kernels are not vendored.
+- `adapters/{exllamav3,gemlite,cutlass,bitnet,llamacpp,ollama}` — integration notes and boundaries. Kernels are not vendored.
 - `benchmark/` — protocol notes and optional full-model runner entry points.
 - `experiments/weights`, `experiments/kv_cache`, `experiments/residency`, `experiments/kernels` — experiment inputs and notes.
 - `experiments/manifests/` — provenance for external checkpoints. Weights themselves are not in Git.
 - `experiments/results/` — small raw JSONL records and the research SQLite database.
 - `search/` — future allocation and runtime search policies.
+- `experiments/search/` — bounded target configuration search spaces; planned curve inputs live under `experiments/residency/` and `experiments/kv_cache/`.
 - `custom/` — first-party low-level boundary, intentionally minimal.
 - `tests/` — CPU unit tests. GPU-only behavior skips or reports unavailable when CUDA is absent.
 - `docs/` — architecture, GPU environment, measured P1/P2 results, and the research plan.
@@ -105,6 +158,8 @@ py -3 -m venv .venv
 .\.venv\Scripts\exvram validate-environment
 .\.venv\Scripts\exvram plan-experiment --config experiments/weights/baseline_27b_8gb.json --index 0
 .\.venv\Scripts\exvram compare-memory-configurations --config experiments/weights/baseline_27b_8gb.json --index 0
+.\.venv\Scripts\exvram plan-search --config experiments/search/rtx5060_27b_search.json --stage adaptive
+.\.venv\Scripts\exvram recommend-config --config experiments/search/rtx5060_27b_search.json
 .\.venv\Scripts\exvram run-synthetic-microbenchmark --output results/synthetic.json
 .\.venv\Scripts\python -m unittest discover -s tests -v
 .\.venv\Scripts\python -m compileall -q src tests
@@ -139,13 +194,24 @@ exvram plan-p2 --manifest experiments/manifests/qwen38_p2.json --queue-output ex
 
 Full-model runners under `benchmark/` call an installed ExLlamaV3 environment or an external llama.cpp binary. Model weights and those binaries stay outside Git. Follow [docs/SAFE_WORKFLOW.md](docs/SAFE_WORKFLOW.md) before any run that touches external storage.
 
+For a local Ollama baseline, use the installed-model-only command:
+
+```text
+exvram run-ollama --model qwen2.5-coder:7b --prompt "Reply briefly: ExVRAM smoke test ready." --output experiments/results/ollama_smoke.jsonl
+```
+
+This command checks `ollama list` first and never downloads a missing model.
+
 ## Research roadmap
 
 - P0 — infrastructure and memory planner.
 - P1 — real layer-level GPU measurements. Recorded for the fixtures in this repo; not a full-model claim.
-- P2 — full-model OSS shootout. A context-128 llama.cpp smoke exists; 8k context, quality, and the comparison matrix are still open.
+- P2 — full-model OSS shootout. A context-128 llama.cpp smoke exists; quality and a matched runtime comparison remain open.
 - P3 — bottleneck-specific optimization, only after a measured full-model gap.
-- P4 — optional ExVRAM runtime or orchestrator, only if P3 shows that composing existing runtimes is not enough.
+- P4 — optional ExVRAM runtime or orchestrator, only if existing runtimes still leave a measured gap.
+- P5 — context scaling and KV precision. The 8k base fit is measured provisionally; repeatability and quality gating are next.
+
+The minimal-refusal track does not replace that order. It runs beside the FULL_GPU work: pick a published abliterated BF16 checkpoint, quantize it with an existing tool, then compare VRAM, tok/s, quality, and refusal rate at a matched quant. Details are in [docs/UNCENSORED_OSS_MATRIX.md](docs/UNCENSORED_OSS_MATRIX.md).
 
 ## License
 

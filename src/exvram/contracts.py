@@ -30,6 +30,12 @@ def _nonnegative_number(
     return float(value)
 
 
+def _optional_nonnegative(mapping: Mapping[str, Any], name: str) -> float | None:
+    if name not in mapping or mapping[name] is None:
+        return None
+    return _nonnegative_number(mapping, name)
+
+
 @dataclass(frozen=True)
 class ModelSpec:
     name: str
@@ -39,12 +45,12 @@ class ModelSpec:
     head_dim: int
     weight_group_size: int = 128
     scale_dtype_bytes: int = 2
-    input_embedding_params_b: float = 0.0
+    input_embedding_params_b: float | None = None
     input_embedding_bits: float = 2.0
-    lm_head_params_b: float = 0.0
+    lm_head_params_b: float | None = None
     lm_head_bits: float = 6.0
-    small_tensors_mib: float = 0.0
-    codebook_mib: float = 0.0
+    small_tensors_mib: float | None = None
+    codebook_mib: float | None = None
 
     @classmethod
     def from_mapping(cls, raw: Mapping[str, Any]) -> "ModelSpec":
@@ -59,14 +65,16 @@ class ModelSpec:
             head_dim=int(_positive_number(raw, "head_dim", integer=True)),
             weight_group_size=int(raw.get("weight_group_size", 128)),
             scale_dtype_bytes=int(raw.get("scale_dtype_bytes", 2)),
-            input_embedding_params_b=_nonnegative_number(raw, "input_embedding_params_b"),
+            input_embedding_params_b=_optional_nonnegative(raw, "input_embedding_params_b"),
             input_embedding_bits=float(raw.get("input_embedding_bits", 2.0)),
-            lm_head_params_b=_nonnegative_number(raw, "lm_head_params_b"),
+            lm_head_params_b=_optional_nonnegative(raw, "lm_head_params_b"),
             lm_head_bits=float(raw.get("lm_head_bits", 6.0)),
-            small_tensors_mib=_nonnegative_number(raw, "small_tensors_mib"),
-            codebook_mib=_nonnegative_number(raw, "codebook_mib"),
+            small_tensors_mib=_optional_nonnegative(raw, "small_tensors_mib"),
+            codebook_mib=_optional_nonnegative(raw, "codebook_mib"),
         )
-        if model.input_embedding_params_b + model.lm_head_params_b > model.params_b:
+        embedding_params = model.input_embedding_params_b or 0.0
+        lm_head_params = model.lm_head_params_b or 0.0
+        if embedding_params + lm_head_params > model.params_b:
             raise ExVRAMError("input/lm_head parameter counts exceed model.params_b")
         if model.input_embedding_bits <= 0 or model.lm_head_bits <= 0:
             raise ExVRAMError("input_embedding_bits and lm_head_bits must be positive")

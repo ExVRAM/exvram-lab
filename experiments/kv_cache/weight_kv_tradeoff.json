@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "experiment_id": "weight-kv-tradeoff-qwen38-27b-v1",
+  "experiment_kind": "WEIGHT_KV_TRADEOFF",
+  "status": "PLANNED",
+  "model_id": "Qwen3.8-27B",
+  "backends": ["exllamav3", "llamacpp"],
+  "contexts": [128, 2048, 8192],
+  "batch_size": 1,
+  "configurations": [
+    {"weight_bits": 2.0, "kv_precision": "fp16"},
+    {"weight_bits": 2.0, "kv_precision": "q4"},
+    {"weight_bits": 2.5, "kv_precision": "fp16"},
+    {"weight_bits": 2.5, "kv_precision": "q4"},
+    {"weight_bits": 3.0, "kv_precision": "q4"},
+    {"weight_bits": 4.0, "kv_precision": "q4"}
+  ],
+  "metrics": [
+    "decode_tokens_per_second",
+    "prefill_tokens_per_second",
+    "ttft_seconds",
+    "persistent_vram_mib",
+    "peak_vram_mib",
+    "quality_gate",
+    "long_context_retrieval",
+    "stability"
+  ],
+  "execution_policy": {
+    "same_checkpoint_required": true,
+    "same_prompt_suite_required": true,
+    "no_quality_substitution": true,
+    "bounded_timeout_seconds": 300,
+    "stable_storage_required": true
+  }
+}

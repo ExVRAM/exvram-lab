@@ -41,3 +41,24 @@ scientific blocker remains: a concrete checkpoint, completed artifact download, 
 quality protocol are required before the planner can claim a 27B fit or the target of at least
 25 decode tokens/s. P2 classification is therefore `INCONCLUSIVE` until two applicable
 full-model paths have measured rows.
+
+## P5 update: context and KV path
+
+The P5 runner closed the full-GPU residency gap for the base IQ2_XXS artifact. Across q4, q8
+and f16 KV experiments, llama.cpp reported `offloaded 65/65 layers to GPU`,
+`flash_attn = enabled`, `kv_unified = false`, and a separate 149.62 MiB recurrent-state buffer.
+The model's hybrid Qwen35 metadata and the 16-layer KV allocation are now evidenced in runtime
+logs rather than inferred from a generic dense-transformer formula.
+
+The base q4 cache reached actual c8192 with 7641 MiB peak VRAM and 29.04 decode tok/s in one
+standardized run. This is not yet a quality-preserving target result: every P5 quality gate is
+`NOT_RUN`, and the q4 c8192 speed is an outlier relative to the c256-c4096 curve and the matched
+q8/f16 c8192 runs. Repeatability and long-context quality are the remaining blockers.
+
+F16 KV also fits at c8192, but only 133 MiB of VRAM and 22 MiB of system RAM were free at the
+worst sampled points. q4 is therefore the provisional default for the next quality run; q8 and
+f16 remain Pareto comparison points, not automatic winners.
+
+This still does not justify a custom kernel. The next proof obligation is a repeated, quality-
+gated comparison of existing runtime paths. Uncensored weights, speculation, Nsight profiling,
+and any custom decoder remain behind that gate.

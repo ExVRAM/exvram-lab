@@ -1,0 +1,42 @@
+name: rtx5060_8gb_qwen38_27b_8k
+stage: P5
+status: measured_provisional
+hardware:
+  gpu: NVIDIA GeForce RTX 5060
+  vram_mib: 8151
+  compute_capability: "12.0"
+model:
+  path: E:/ExVRAM/models/Qwen3.8-27B-UD-IQ2_XXS.gguf
+  sha256: e792d8fb3142fe6d9171876d6da0f71f05a71028718debc72dbec93ff645e67d
+runtime:
+  binary: E:/ExVRAM/.cache/llama/runtime-b10982-cuda13.4/llama-server.exe
+  build: b10982
+  commit: fc82583e6
+  device: CUDA0
+  gpu_layers: 999
+  fit: "off"
+  split_mode: none
+  flash_attn: "on"
+  cache_type_k: q4_0
+  cache_type_v: q4_0
+  context: 8192
+  batch: 32
+  ubatch: 1
+  parallel: 1
+  reasoning: "off"
+  seed: 42
+  temperature: 0.0
+  warmup: true
+measurement:
+  decode_tokens: 256
+  quality_gate: NOT_RUN
+  source: experiments/results/p5_context_scaling_q4.jsonl
+  result_id: p5-context-c8192-q4_0-q4_0
+  observed_decode_tok_s: 29.0433
+  observed_prefill_tok_s: 32.5808
+  observed_peak_vram_mib: 7641
+  caveat: single provisional run; repeat and quality validation required
+provenance:
+  synthetic: false
+  custom_kernel: false
+  uncensored: false

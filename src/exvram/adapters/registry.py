@@ -84,6 +84,24 @@ def all_adapters() -> tuple[ExternalAdapter, ...]:
                 "llama-cli or llama-server on PATH."
             ),
         ),
+        ExternalAdapter(
+            AdapterInfo(
+                "ollama",
+                "https://github.com/ollama/ollama",
+                "Optional baseline runtime for locally installed Ollama models.",
+                "external-cli-runtime",
+                "MIT",
+                caution=(
+                    "ExVRAM never downloads models through this adapter; model licenses and "
+                    "Ollama distribution terms remain separate."
+                ),
+            ),
+            executable_names=("ollama",),
+            installation_note=(
+                "Install Ollama using its official instructions; only models already shown by "
+                "ollama list are eligible for an ExVRAM smoke run."
+            ),
+        ),
     )
 
 

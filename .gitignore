@@ -23,8 +23,10 @@ hf_cache/
 .cache/
 huggingface/
 models/
+artifacts/
 *.gguf
 *.safetensors
+*.exl3
 *.bin
 *.pt
 *.pth
@@ -33,6 +35,10 @@ models/
 *.whl
 /tmp/
 *.log
+experiments/results/p4_*.csv
+experiments/results/p4_*.err
+experiments/results/p5_*.csv
+experiments/results/p5_*.err
 .DS_Store
 Thumbs.db
 *.sqlite-journal

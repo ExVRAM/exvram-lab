@@ -8,6 +8,8 @@ experiment JSON
       v
 config + memory planner ----> plan JSON
       |
+      +----> bounded configuration search ----> evidence-aware recommendations
+      |
       +----> optional adapter registry ----> external runtime (not vendored)
       |
       +----> synthetic/real benchmark ----> versioned result JSON
@@ -35,11 +37,24 @@ model/backend manifest -> P2 queue -> external runner -> raw JSONL -> SQLite res
   synthetic and carries hardware telemetry plus a quality-gate status.
 - `MemoryBudget` exposes raw packed-weight math, scale metadata, KV estimate, reserve, total, and
   assumptions so a plan can be challenged rather than treated as a fact.
+- `SearchSpace` and the optimizer use bounded screen/deep stages. A measurement is attached to a
+  candidate only when its result records the exact generated candidate identity.
 - `QueueItem` and the research-record schema use explicit `PLANNED`, `RUNNING`, `PASS`, `FAIL`,
   and `INCONCLUSIVE` states. SQLite rows are upserted by stable experiment ID, while JSONL keeps
   an exchangeable raw record format.
 - `benchmark/run_exllama_p2.py` and `benchmark/run_llamacpp_p2.py` are integration-boundary
   runners. They invoke optional installed runtimes; they do not copy or import their kernels.
+
+## Model behaviour and application policy
+
+Refusal behaviour is a property of the checkpoint under test. ExVRAM measures it with a
+separate scorer, `exvram score-refusal`, which reads responses that were already generated.
+That scorer is not a quantizer, not a runtime, and not an application policy.
+
+An application policy, if one is added later, has to live outside the weights and stay
+configurable. It must not be folded into decode speed, residency, or the weight format.
+Heretic is an external research CLI for producing or scoring a minimal-refusal checkpoint.
+`exvram plan-heretic` only prints that command. It does not implement abliteration.
 
 ## Dependency policy
 

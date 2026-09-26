@@ -39,6 +39,11 @@ def _parser() -> argparse.ArgumentParser:
     parser.add_argument("--gpu-layers", default="auto")
     parser.add_argument("--cache-type-k", default="q4_0")
     parser.add_argument("--cache-type-v", default="q4_0")
+    parser.add_argument(
+        "--search-candidate-id",
+        default=None,
+        help="exact candidate identity from experiments/search/*.json",
+    )
     parser.add_argument("--timeout", type=int, default=1800)
     parser.add_argument("--output", required=True)
     parser.add_argument(
@@ -152,6 +157,8 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         },
         "command": command,
     }
+    if args.search_candidate_id:
+        record["search_candidate_id"] = args.search_candidate_id
     started = time.perf_counter()
     try:
         assert_storage_safe(
