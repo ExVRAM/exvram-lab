@@ -1,4 +1,5 @@
 import importlib.util
+import sys
 import unittest
 from pathlib import Path
 
@@ -15,6 +16,7 @@ def _load_fetcher():
     return module
 
 
+@unittest.skipUnless(sys.platform == "win32", "drive-letter ban is a Windows volume rule")
 class ColettiFetchGuardTests(unittest.TestCase):
     def test_f_drive_is_rejected_even_when_windows_reports_it_fixed(self):
         fetcher = _load_fetcher()
