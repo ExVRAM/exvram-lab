@@ -62,10 +62,31 @@ def assert_model_fits_host_ram(model: Path) -> None:
     Direct I/O keeps a model that fits from flushing the desktop cache. A file
     larger than RAM still forces the working set into the pagefile.
     """
-    if sys.platform != "win32":
-        return
     size = model.stat().st_size
+    physical = _physical_ram_bytes()
+    if physical is not None and size > physical:
+        raise RuntimeError(
+            f"{model.name} is {size} bytes and physical RAM is {physical} bytes. "
+            "Opening it pages the workstation out."
+        )
 
+
+def _physical_ram_bytes() -> int | None:
+    if sys.platform == "win32":
+        return _windows_physical_ram_bytes()
+    try:
+        pages = os.sysconf("SC_PHYS_PAGES")
+        page_size = os.sysconf("SC_PAGE_SIZE")
+    except (AttributeError, OSError, ValueError):
+        return None
+    if not isinstance(pages, int) or not isinstance(page_size, int):
+        return None
+    if pages <= 0 or page_size <= 0:
+        return None
+    return pages * page_size
+
+
+def _windows_physical_ram_bytes() -> int | None:
     class _MemoryStatus(ctypes.Structure):
         _fields_ = [
             ("dwLength", ctypes.c_ulong),
@@ -82,12 +103,8 @@ def assert_model_fits_host_ram(model: Path) -> None:
     status = _MemoryStatus()
     status.dwLength = ctypes.sizeof(status)
     if not ctypes.windll.kernel32.GlobalMemoryStatusEx(ctypes.byref(status)):
-        return
-    if size > status.ullTotalPhys:
-        raise RuntimeError(
-            f"{model.name} is {size} bytes and physical RAM is {status.ullTotalPhys} bytes. "
-            "Opening it pages the workstation out."
-        )
+        return None
+    return int(status.ullTotalPhys)
 
 
 _PROMPT_RE = re.compile(r"prompt eval time\s*=\s*([0-9.]+) ms /\s*([0-9]+) tokens")

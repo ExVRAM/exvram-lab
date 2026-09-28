@@ -230,6 +230,7 @@ def quality_metrics(reference: Sequence[float], reconstructed: Sequence[float]) 
     ref_norm = math.sqrt(sum(float(value) ** 2 for value in reference))
     actual_norm = math.sqrt(sum(float(value) ** 2 for value in reconstructed))
     cosine = dot / (ref_norm * actual_norm) if ref_norm and actual_norm else 0.0
+    cosine = min(1.0, max(-1.0, cosine))
     max_abs = max(abs(error) for error in errors)
     max_ref = max(max(abs(float(value)) for value in reference), 1e-12)
     return {
