@@ -17,8 +17,19 @@ class CLITests(unittest.TestCase):
         payload = json.loads(output.getvalue())
         names = {item["name"] for item in payload["adapters"]}
         self.assertEqual(
-            names, {"exllamav3", "gemlite", "cutlass", "bitnet", "llamacpp", "ollama"}
+            names,
+            {"exllamav3", "gemlite", "hqq", "cutlass", "bitnet", "llamacpp", "ollama"},
         )
+
+    def test_plan_p8_binary_is_explicitly_unmeasured(self):
+        output = io.StringIO()
+        with redirect_stdout(output):
+            self.assertEqual(main(["plan-p8-binary"]), 0)
+        payload = json.loads(output.getvalue())
+        self.assertEqual(payload["track"], "P8")
+        self.assertEqual(payload["measurement_status"], "PLANNED")
+        self.assertEqual(payload["decision_gate"]["status"], "NOT_RUN")
+        self.assertGreater(len(payload["records"]), 0)
 
     def test_plan_experiment_contains_memory_and_adapter_plans(self):
         output = io.StringIO()

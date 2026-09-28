@@ -1,6 +1,6 @@
 # Third-party projects and license boundary
 
-This file records the integration boundary as checked on 2026-09-23. Minimal-refusal rows were
+This file records the integration boundary as checked on 2026-09-26. Minimal-refusal rows were
 added on 2026-09-24. ExVRAM Lab does not copy
 third-party source code into this repository. External runtimes are optional integrations or
 submodules to be selected later, with their own installation and license obligations.
@@ -8,7 +8,10 @@ submodules to be selected later, with their own installation and license obligat
 | Project | Repository | Version/revision checked | License | Reused component | Modified status | Commercial compatibility |
 |---|---|---|---|---|---|---|
 | ExLlamaV3 | [turboderp-org/exllamav3](https://github.com/turboderp-org/exllamav3) | `1.5.1+cu128.torch2.10.0` official Windows wheel; SHA-256 `cab2d227383f648b8c4d6ff05b6510ca809d17b5b928fece870b5500d2e5a990` | MIT | Optional EXL3 quantizer/runtime API | Not copied or modified | Compatible with commercial use subject to MIT notice and upstream/model terms |
-| GemLite | [dropbox/gemlite](https://github.com/dropbox/gemlite) | PyPI `0.6.0.post1`, measured in `.venv-gpu` | Apache-2.0 | Optional Triton low-bit matmul kernels | Not copied or modified | Compatible with commercial use subject to Apache notices/patent terms |
+| GemLite | [dropbox/gemlite](https://github.com/dropbox/gemlite) | PyPI `0.6.0.post1`, source commit `89d9bc705c5dfca9115d3a5620f97a17ba0111a` | Apache-2.0 | Optional Triton low-bit matmul kernels, including the P8 1/2-bit boundary | Not copied or modified | Compatible with commercial use subject to Apache notices/patent terms |
+| HQQ | [dropbox/hqq](https://github.com/dropbox/hqq) | commit `d88a488ec8aa2d58362ef2038a52bca862db2e74` | Apache-2.0 | Optional 1/2-bit layer quantization and reconstruction API for P8 | Not copied or modified | Compatible with commercial use subject to Apache notices/patent terms |
+| PB-LLM (reference only) | [hahnyuan/PB-LLM](https://github.com/hahnyuan/PB-LLM) | commit `fe85da943d9df48ab6455d698f75406bb0bfefbc` | MIT | Algorithmic reference for partially binarized weights and salient exceptions | Not copied or modified | Compatible with commercial use subject to MIT notice; no runtime code is included |
+| BiLLM (reference only) | [Aaronhuang-778/BiLLM](https://github.com/Aaronhuang-778/BiLLM) | `main` commit `dc137ebbf62d4b31e8a82ba6bf9e18a51a298dcb` | MIT | Layer-feasibility and 1-bit training/reference results | Not copied or modified | Compatible with commercial use subject to MIT notice; no runtime code is included |
 | triton-windows | [woct0rdho/triton-windows](https://github.com/woct0rdho/triton-windows) | `3.8.0.post28` with GemLite; `3.6.0.post26` with ExLlamaV3 | MIT package license | Windows compatibility distribution providing the `triton` module | Not copied or modified | Compatible subject to its MIT notice; upstream Triton and CUDA terms remain separate |
 | PyTorch | [pytorch/pytorch](https://github.com/pytorch/pytorch) | `2.14.0+cu130` GemLite env; `2.10.0+cu128` ExLlama env | BSD-style | Optional CUDA tensor/runtime and timing API | Not copied or modified | Compatible subject to PyTorch and CUDA redistribution terms |
 | CUTLASS | [NVIDIA/cutlass](https://github.com/NVIDIA/cutlass) | `4.8.0` release shown by upstream on 2026-09-23 | BSD-3-Clause for applicable core components | Optional CUDA/CuTe building blocks after component-level review | Not copied or modified | Compatible for applicable BSD component; verify EULA-governed files separately |

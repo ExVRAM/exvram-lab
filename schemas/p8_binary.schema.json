@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://exvram.dev/schemas/p8_binary.schema.json",
+  "title": "ExVRAM P8 binary layer plan",
+  "type": "object",
+  "required": ["schema_version", "id", "track", "model", "shapes", "external"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "id": {"type": "string", "minLength": 1},
+    "track": {"const": "P8"},
+    "model": {"type": "object"},
+    "shapes": {"type": "array", "minItems": 1, "items": {"type": "object"}},
+    "external": {"type": "object"},
+    "references": {"type": "object"},
+    "physical_layout": {"type": "object"},
+    "kpi": {"type": "object"}
+  },
+  "additionalProperties": true
+}

@@ -1,15 +1,15 @@
 name: rtx5060_8gb_qwen38_27b_8k
-stage: P5
-status: measured_provisional
+stage: P6
+status: measured_occupied_8k_speed_quality_not_run
 hardware:
   gpu: NVIDIA GeForce RTX 5060
   vram_mib: 8151
   compute_capability: "12.0"
 model:
-  path: E:/ExVRAM/models/Qwen3.8-27B-UD-IQ2_XXS.gguf
+  file: Qwen3.8-27B-UD-IQ2_XXS.gguf
   sha256: e792d8fb3142fe6d9171876d6da0f71f05a71028718debc72dbec93ff645e67d
+  quant: UD-IQ2_XXS
 runtime:
-  binary: E:/ExVRAM/.cache/llama/runtime-b10982-cuda13.4/llama-server.exe
   build: b10982
   commit: fc82583e6
   device: CUDA0
@@ -19,23 +19,43 @@ runtime:
   flash_attn: "on"
   cache_type_k: q4_0
   cache_type_v: q4_0
-  context: 8192
+  ctx_checkpoints: 0
+  cache_ram_mib: 0
+  configured_context_tokens: 8448
   batch: 32
   ubatch: 1
   parallel: 1
   reasoning: "off"
   seed: 42
   temperature: 0.0
-  warmup: true
+  warmup_runs: 1
 measurement:
   decode_tokens: 256
+  repeats: 5
   quality_gate: NOT_RUN
-  source: experiments/results/p5_context_scaling_q4.jsonl
-  result_id: p5-context-c8192-q4_0-q4_0
-  observed_decode_tok_s: 29.0433
-  observed_prefill_tok_s: 32.5808
-  observed_peak_vram_mib: 7641
-  caveat: single provisional run; repeat and quality validation required
+  source: experiments/results/p6_reproducibility.jsonl
+  prompt_tokens: 8192
+  tokens_in_cache_before_decode: 8192
+  generated_tokens: 256
+  final_context_occupancy: 8448
+  offloaded_layers: "65/65"
+  cpu_decoder_weight_offload: 0
+  cuda_model_buffer_mib: 6521.13
+  cuda_host_model_buffer_mib: 397.85
+  kv_mib: 148.5
+  recurrent_state_mib: 149.62
+  median_decode_tok_s: 30.1014
+  cv: 0.0203
+  median_prefill_tok_s: 33.6
+  median_ttft_s: 243.8
+  peak_vram_mib: 7767
+  max_gpu_utilization_percent: 100
+  max_memory_controller_utilization_percent: 61
+  measured_on: "2026-09-27"
+  caveat: >
+    Speed is measured and repeatable. Status is not MEASURED_REPRODUCIBLE
+    because the quality gate has not been run. q8_0 and f16 KV were not
+    measured at this occupancy.
 provenance:
   synthetic: false
   custom_kernel: false

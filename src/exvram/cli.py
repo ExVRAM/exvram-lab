@@ -21,6 +21,8 @@ from .optimizer import (
     recommend_configurations,
     write_json_payload,
 )
+from .p8_binary import build_p8_plan
+from .p8_binary import load_manifest as load_p8_manifest
 from .refusal import load_refusal_jsonl, score_refusal
 from .research import (
     default_p2_queue,
@@ -52,6 +54,14 @@ def _parser() -> argparse.ArgumentParser:
     p2.add_argument("--manifest", required=True)
     p2.add_argument("--queue-output", required=True, help="JSONL queue output")
     p2.add_argument("--database", help="optional SQLite research database")
+
+    p8 = commands.add_parser(
+        "plan-p8-binary", help="plan the external 1-bit layer-level research matrix"
+    )
+    p8.add_argument(
+        "--manifest", default="experiments/manifests/p8_binary_qwen38.json"
+    )
+    p8.add_argument("--output", help="write the plan JSON to this path")
 
     record = commands.add_parser(
         "record-research", help="upsert a completed/failed research record into SQLite"
@@ -227,6 +237,14 @@ def _plan_p2(args: argparse.Namespace) -> int:
             "experiments": [item.to_dict() for item in queue],
         }
     )
+    return 0
+
+
+def _plan_p8_binary(args: argparse.Namespace) -> int:
+    plan = build_p8_plan(load_p8_manifest(args.manifest))
+    if args.output:
+        plan["saved_to"] = write_json_payload(plan, args.output)
+    _dump(plan)
     return 0
 
 
@@ -408,6 +426,8 @@ def main(argv: list[str] | None = None) -> int:
             return _validate_research_manifest(args)
         if args.command == "plan-p2":
             return _plan_p2(args)
+        if args.command == "plan-p8-binary":
+            return _plan_p8_binary(args)
         if args.command == "record-research":
             return _record_research(args)
         if args.command == "plan-experiment":

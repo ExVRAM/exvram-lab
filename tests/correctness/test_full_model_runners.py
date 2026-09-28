@@ -1,6 +1,9 @@
 import importlib.util
+import os
+import sys
 import unittest
 from pathlib import Path
+from types import SimpleNamespace
 from unittest.mock import patch
 
 
@@ -24,7 +27,42 @@ def _load_exllama_runner():
     return module
 
 
+def _load_benchmark(name: str):
+    path = Path(__file__).parents[2] / "benchmark" / f"{name}.py"
+    spec = importlib.util.spec_from_file_location(name, path)
+    if spec is None or spec.loader is None:
+        raise RuntimeError(f"cannot load {path}")
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[name] = module
+    spec.loader.exec_module(module)
+    return module
+
+
 class FullModelRunnerTests(unittest.TestCase):
+    def test_server_launch_uses_direct_io_and_low_priority(self):
+        _load_benchmark("run_p5_context_scaling")
+        runner = _load_benchmark("run_p6_reproducibility")
+        args = SimpleNamespace(
+            server="llama-server",
+            model="model.gguf",
+            batch_size=32,
+            ubatch_size=1,
+            cache_type_k="q4_0",
+            cache_type_v="q4_0",
+        )
+        command = runner._server_command(args, 512, 9)
+        self.assertEqual(command[command.index("--load-mode") + 1], "dio")
+        self.assertEqual(command[command.index("--prio") + 1], "-1")
+        threads = max(1, (os.cpu_count() or 1) - 2)
+        self.assertEqual(command[command.index("--threads") + 1], str(threads))
+        self.assertEqual(command[command.index("--threads-batch") + 1], str(threads))
+
+    def test_gguf_larger_than_physical_ram_is_refused(self):
+        runner = _load_benchmark("run_p5_context_scaling")
+        with patch.object(Path, "stat", return_value=SimpleNamespace(st_size=60 * 1024**3)):
+            with self.assertRaises(RuntimeError):
+                runner.assert_model_fits_host_ram(Path("huge.gguf"))
+
     def test_llamacpp_perf_lines_are_parsed_into_explicit_metrics(self):
         runner = _load_llamacpp_runner()
         output = """

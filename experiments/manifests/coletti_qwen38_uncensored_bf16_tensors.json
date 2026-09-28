@@ -1,0 +1,31 @@
+{
+  "source_manifest": "experiments/manifests/coletti_qwen38_uncensored_bf16.json",
+  "revision": "5bb7aa90f0efef548e87005b1fb7658e522b6b7f",
+  "tensor_count": 1199,
+  "index_name_set_equal": true,
+  "dtypes": {
+    "BF16": 1199
+  },
+  "index_total_size": 55562857544,
+  "summed_tensor_payload_bytes": 55562855904,
+  "index_minus_payload_bytes": 1640,
+  "counts": {
+    "lm_head": 1,
+    "embed": 1,
+    "text": 849,
+    "vision": 333,
+    "mtp": 15
+  },
+  "bytes": {
+    "lm_head": 2542796800,
+    "embed": 2542796800,
+    "text": 48706403328,
+    "vision": 921460192,
+    "mtp": 849398784
+  },
+  "architecture": "Qwen3_5ForConditionalGeneration",
+  "text_layers": 64,
+  "mtp_layers": 1,
+  "hidden_size": 5120,
+  "vocab_size": 248320
+}

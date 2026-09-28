@@ -62,3 +62,15 @@ f16 remain Pareto comparison points, not automatic winners.
 This still does not justify a custom kernel. The next proof obligation is a repeated, quality-
 gated comparison of existing runtime paths. Uncensored weights, speculation, Nsight profiling,
 and any custom decoder remain behind that gate.
+
+## P6 reproducibility result
+
+P6 five-run short-prompt controls are now stable at c256/c512/c1024/c4096/c8192, but their
+occupancy is only 256 or 266 tokens. The configured c8192 median is 17.67 tok/s, not the P5
+single-run 29.04 tok/s. The old P5 prompt occupied approximately 5496 tokens, not 8192.
+
+A tokenizer-sized filled prompt was generated and verified, but the current Qwen hybrid prefill
+path became hour-scale slow under the tested batch/ubatch settings. No filled c8192 throughput
+number is claimed. c2048 is also missing a completed five-run series because the environment
+guard detected residual VRAM contention. The next gap is therefore a safe filled-context runtime
+protocol, not a new kernel.

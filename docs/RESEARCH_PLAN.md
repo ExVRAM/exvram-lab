@@ -48,6 +48,25 @@ The P3 branch is selected from the measured P2 classification: A existing OSS su
 gap, C speed gap, D quality gap, or E multiple gaps. Until P2 has measured points, P3 remains
 planned rather than being silently optimized against a proxy.
 
+## P8 — frequent-group 1-bit / binary representation
+
+P8 is a separate layer-level branch. It does not alter P4/P5/P6 recipes and it does not start
+full-model quantization or training. The first candidates are external HQQ and GemLite; PB-LLM
+and BiLLM are MIT reference tracks. GPL research code is not copied into this Apache-2.0 tree.
+
+- Use the real Qwen3.8-27B q/k/v/o, MLP, and feasible `lm_head` shapes.
+- Sweep HQQ at groups 8/16/32/64/128, with 8/16 quality/memory-only; sweep GemLite fast paths at
+  groups 32/64/128.
+- Compare FP16/BF16, HQQ 1/2-bit, GemLite 1/2-bit, PB-LLM 90/10, 95/5, 97.5/2.5, BiLLM reference,
+  and the IQ2_XXS estimate.
+- Count packed weights, scales, zeros, metadata, padding, and persistent buffers in physical bpw.
+- Record tensor reconstruction metrics and GemLite M=1/8/32/128 median/p95 performance separately.
+- Allow a custom kernel only after a same-shape gap is proven against at least two existing approaches.
+
+The P8 KPI is `<=1.6 physical bpw` and `<=1.2x` the measured 2-bit latency; the stretch target is
+`<=1.4 bpw` and `<=1.1x`. Current P8 output is a CPU-safe plan with all quality/performance fields
+`NOT_RUN`; see [BINARY_1BIT_RESEARCH.md](BINARY_1BIT_RESEARCH.md).
+
 ## Minimal-refusal track
 
 This track is parallel to P2/P3. It does not replace the FULL_GPU performance work, and it
@@ -81,6 +100,7 @@ loss.
 - P1: layer-level comparison of existing kernels.
 - P2: full-model fit, residency, quality, and Pareto frontier.
 - P3: 8k context and the >=25 tok/s target after the measured gap is isolated.
+- P8: layer-level binary/1-bit Pareto evidence; remains separate from the P3 production path.
 - P4: optional ExVRAM runtime/orchestrator only after P3 demonstrates that composing existing
   runtimes is not enough.
 - Minimal-refusal: requantize the published Heretic BF16 checkpoint at the matched quant.

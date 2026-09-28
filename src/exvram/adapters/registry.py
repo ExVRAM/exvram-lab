@@ -35,6 +35,21 @@ def all_adapters() -> tuple[ExternalAdapter, ...]:
         ),
         ExternalAdapter(
             AdapterInfo(
+                "hqq",
+                "https://github.com/dropbox/hqq",
+                "Optional HQQ 1/2-bit group-wise quantization boundary.",
+                "optional-python-quantizer",
+                "Apache-2.0",
+                caution=(
+                    "HQQ measurements must use the external implementation; ExVRAM does not "
+                    "reimplement its quantizer."
+                ),
+            ),
+            import_names=("hqq",),
+            installation_note="Install HQQ from its official repository/package instructions.",
+        ),
+        ExternalAdapter(
+            AdapterInfo(
                 "cutlass",
                 "https://github.com/NVIDIA/cutlass",
                 "Optional CUDA/CUTLASS building-block integration candidate.",

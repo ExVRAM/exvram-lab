@@ -2,7 +2,7 @@
 
 Status: **NOT RUN**.
 
-The P5 base-model context and KV measurements are complete, but the uncensored
+The P6 base-model reproducibility and KV measurements are incomplete, and the uncensored
 track has not been downloaded or benchmarked. No uncensored tok/s, VRAM, quality,
 refusal-rate or 8k-fit result is claimed.
 

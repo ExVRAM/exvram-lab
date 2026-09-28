@@ -1,0 +1,86 @@
+{
+  "schema_version": 1,
+  "id": "p8-binary-qwen38-layer-v1",
+  "track": "P8",
+  "model": {
+    "id": "Qwen3.8-27B",
+    "source_revision": "1d4bf0f2ff6012fd82039f2fa52739d0dd7c60c0",
+    "parameters_b": 27.781427952,
+    "layers": 64,
+    "hidden_size": 5120,
+    "intermediate_size": 17408,
+    "attention_heads": 24,
+    "kv_heads": 4,
+    "head_dim": 256,
+    "vocab_size": 248320,
+    "license": "Apache-2.0"
+  },
+  "shapes": [
+    {"name": "full_attention.q_proj", "in_features": 5120, "out_features": 6144, "layer_kind": "attention_projection"},
+    {"name": "full_attention.k_proj", "in_features": 5120, "out_features": 1024, "layer_kind": "attention_projection"},
+    {"name": "full_attention.v_proj", "in_features": 5120, "out_features": 1024, "layer_kind": "attention_projection"},
+    {"name": "full_attention.o_proj", "in_features": 6144, "out_features": 5120, "layer_kind": "attention_projection"},
+    {"name": "mlp.gate_proj", "in_features": 5120, "out_features": 17408, "layer_kind": "mlp_up_gate"},
+    {"name": "mlp.up_proj", "in_features": 5120, "out_features": 17408, "layer_kind": "mlp_up_gate"},
+    {"name": "mlp.down_proj", "in_features": 17408, "out_features": 5120, "layer_kind": "mlp_down"},
+    {"name": "lm_head", "in_features": 5120, "out_features": 248320, "layer_kind": "output_projection"}
+  ],
+  "external": {
+    "hqq": {
+      "repository": "https://github.com/dropbox/hqq",
+      "revision": "d88a488ec8aa2d58362ef2038a52bca862db2e74",
+      "license": "Apache-2.0",
+      "bits": [1, 2],
+      "group_sizes": [8, 16, 32, 64, 128],
+      "fast_path_group_sizes": [32, 64, 128],
+      "code_copied": false
+    },
+    "gemlite": {
+      "repository": "https://github.com/dropbox/gemlite",
+      "revision": "89d9bc705c5dfca9115d3a5620f97a17ba0111a7",
+      "license": "Apache-2.0",
+      "bits": [1, 2],
+      "group_sizes": [32, 64, 128],
+      "batch_sizes": [1, 8, 32, 128],
+      "code_copied": false
+    },
+    "pbllm": {
+      "repository": "https://github.com/hahnyuan/PB-LLM",
+      "revision": "fe85da943d9df48ab6455d698f75406bb0bfefbc",
+      "license": "MIT",
+      "code_copied": false
+    },
+    "billm": {
+      "repository": "https://github.com/Aaronhuang-778/BiLLM",
+      "revision": "dc137ebbf62d4b31e8a82ba6bf9e18a51a298dcb",
+      "license": "MIT",
+      "code_copied": false
+    }
+  },
+  "references": {
+    "iq2_xxs": {
+      "nominal_bpw": 2.0625,
+      "artifact_bytes": 7266070528,
+      "artifact_sha256": "e792d8fb3142fe6d9171876d6da0f71f05a71028718debc72dbec93ff645e67d",
+      "note": "Nominal GGML type rate; serialized mixed-file average is tracked separately."
+    },
+    "exl3": {
+      "nominal_bpw": 4.0,
+      "note": "Reference only until an EXL3 layer fixture is supplied."
+    }
+  },
+  "physical_layout": {
+    "scale_dtype": "fp16",
+    "zero_dtype": "fp16",
+    "buffer_alignment_bytes": 32,
+    "persistent_buffers_in_total": true,
+    "metadata_policy": "count bitmap/index/padding explicitly; do not collapse into nominal bits"
+  },
+  "kpi": {
+    "physical_bpw_max": 1.6,
+    "stretch_physical_bpw_max": 1.4,
+    "latency_ratio_max": 1.2,
+    "stretch_latency_ratio_max": 1.1,
+    "quality_gate": "layer proxy first; full-model intelligence is not inferred from MSE"
+  }
+}

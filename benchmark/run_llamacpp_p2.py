@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import subprocess
 import sys
@@ -12,6 +13,11 @@ from pathlib import Path
 from typing import Any
 
 from exvram.storage import StorageSafetyError, assert_storage_safe
+
+try:
+    from run_p5_context_scaling import assert_model_fits_host_ram
+except ModuleNotFoundError:
+    from benchmark.run_p5_context_scaling import assert_model_fits_host_ram
 
 _PROMPT_RE = re.compile(r"prompt eval time\s*=\s*([0-9.]+) ms /\s*([0-9]+) tokens")
 _DECODE_RE = re.compile(r"eval time\s*=\s*([0-9.]+) ms /\s*([0-9]+) runs")
@@ -118,6 +124,14 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         str(args.context),
         "--gpu-layers",
         args.gpu_layers,
+        "--load-mode",
+        "dio",
+        "--prio",
+        "-1",
+        "--threads",
+        str(max(1, (os.cpu_count() or 1) - 2)),
+        "--threads-batch",
+        str(max(1, (os.cpu_count() or 1) - 2)),
         "--cache-type-k",
         args.cache_type_k,
         "--cache-type-v",
@@ -166,6 +180,7 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
             allow_removable=args.allow_removable_storage,
         )
         model_bytes = Path(args.model).stat().st_size
+        assert_model_fits_host_ram(Path(args.model))
         completed = subprocess.run(
             command,
             capture_output=True,
@@ -174,6 +189,11 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
             errors="replace",
             timeout=args.timeout,
             check=False,
+            creationflags=(
+                getattr(subprocess, "CREATE_NO_WINDOW", 0) | 0x00004000
+                if sys.platform == "win32"
+                else 0
+            ),
         )
         elapsed = time.perf_counter() - started
         combined = (completed.stdout or "") + "\n" + (completed.stderr or "")

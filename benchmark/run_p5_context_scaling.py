@@ -24,6 +24,72 @@ from typing import Any
 
 from exvram.storage import StorageSafetyError, assert_storage_safe
 
+# Process creation flag. Applied before llama.cpp reads the GGUF, so the
+# desktop keeps a core while weights are loading.
+_BELOW_NORMAL_PRIORITY_CLASS = 0x00004000
+
+
+def desktop_safe_launch_args() -> list[str]:
+    """Keep the workstation responsive while a multi-gigabyte GGUF is opened.
+
+    Default mmap fills the Windows standby list and evicts the desktop working
+    set. Direct I/O skips that cache. Low priority and two reserved threads
+    leave the UI a way to run during the load.
+    """
+    threads = max(1, (os.cpu_count() or 1) - 2)
+    return [
+        "--load-mode",
+        "dio",
+        "--prio",
+        "-1",
+        "--threads",
+        str(threads),
+        "--threads-batch",
+        str(threads),
+    ]
+
+
+def windows_launch_flags() -> int:
+    flags = getattr(subprocess, "CREATE_NO_WINDOW", 0)
+    if sys.platform == "win32":
+        flags |= _BELOW_NORMAL_PRIORITY_CLASS
+    return flags
+
+
+def assert_model_fits_host_ram(model: Path) -> None:
+    """Refuse a GGUF larger than physical RAM.
+
+    Direct I/O keeps a model that fits from flushing the desktop cache. A file
+    larger than RAM still forces the working set into the pagefile.
+    """
+    if sys.platform != "win32":
+        return
+    size = model.stat().st_size
+
+    class _MemoryStatus(ctypes.Structure):
+        _fields_ = [
+            ("dwLength", ctypes.c_ulong),
+            ("dwMemoryLoad", ctypes.c_ulong),
+            ("ullTotalPhys", ctypes.c_ulonglong),
+            ("ullAvailPhys", ctypes.c_ulonglong),
+            ("ullTotalPageFile", ctypes.c_ulonglong),
+            ("ullAvailPageFile", ctypes.c_ulonglong),
+            ("ullTotalVirtual", ctypes.c_ulonglong),
+            ("ullAvailVirtual", ctypes.c_ulonglong),
+            ("ullAvailExtendedVirtual", ctypes.c_ulonglong),
+        ]
+
+    status = _MemoryStatus()
+    status.dwLength = ctypes.sizeof(status)
+    if not ctypes.windll.kernel32.GlobalMemoryStatusEx(ctypes.byref(status)):
+        return
+    if size > status.ullTotalPhys:
+        raise RuntimeError(
+            f"{model.name} is {size} bytes and physical RAM is {status.ullTotalPhys} bytes. "
+            "Opening it pages the workstation out."
+        )
+
+
 _PROMPT_RE = re.compile(r"prompt eval time\s*=\s*([0-9.]+) ms /\s*([0-9]+) tokens")
 _DECODE_RE = re.compile(r"eval time\s*=\s*([0-9.]+) ms /\s*([0-9]+) tokens")
 _RATE_RE = re.compile(
@@ -412,6 +478,7 @@ def _run_one(
         "none",
         "--fit",
         "off",
+        *desktop_safe_launch_args(),
         "--batch-size",
         "32",
         "--ubatch-size",
@@ -427,7 +494,7 @@ def _run_one(
         "--reasoning",
         "off",
         "--verbosity",
-        "4",
+        "3",
     ]
     base: dict[str, Any] = {
         "schema_version": 1,
@@ -471,13 +538,14 @@ def _run_one(
     )
     started = time.perf_counter()
     try:
+        assert_model_fits_host_ram(Path(args.model))
         server = subprocess.Popen(
             command,
             stdin=subprocess.DEVNULL,
             stdout=server_log,
             stderr=subprocess.STDOUT,
             text=True,
-            creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
+            creationflags=windows_launch_flags(),
         )
         monitor = _start_gpu_monitor(gpu_path)
         system_thread.start()

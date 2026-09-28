@@ -39,6 +39,9 @@ experiments/results/p4_*.csv
 experiments/results/p4_*.err
 experiments/results/p5_*.csv
 experiments/results/p5_*.err
+experiments/results/p6_*.csv
+experiments/results/p6_*.err
+experiments/results/p6_*.jsonl.lock
 .DS_Store
 Thumbs.db
 *.sqlite-journal

@@ -1,0 +1,123 @@
+{
+  "repo_id": "JonathanColetti/Qwen3.8-27B-Uncensored",
+  "revision": "5bb7aa90f0efef548e87005b1fb7658e522b6b7f",
+  "license": "Apache-2.0",
+  "local_dir": "models/sources/JonathanColetti-Qwen3.8-27B-Uncensored-5bb7aa90",
+  "drive": null,
+  "free_bytes_before_download": 253088772096,
+  "immutable": true,
+  "huggingface_hub": "1.33.0",
+  "verified_at": "2026-09-26T08:27:09.501852+00:00",
+  "files": [
+    {
+      "name": ".gitattributes",
+      "bytes": 1570,
+      "sha256": "34448b82c17d60fec9b65b1f093c115ddbaadc04beb1b0140b6bfed2e012a930"
+    },
+    {
+      "name": "README.md",
+      "bytes": 7854,
+      "sha256": "f1cf33df087407cd10f2f0923f9f166072f1bb11417f822139a8a217f23a1168"
+    },
+    {
+      "name": "chat_template.jinja",
+      "bytes": 8952,
+      "sha256": "c3cf9e34abf4f9e36c2d72165aa9c132d3e2a725b6c2586aaa3a8af9d7a81041"
+    },
+    {
+      "name": "config.json",
+      "bytes": 3688,
+      "sha256": "4c95af1d45132ead5b63e540f08f32a351e20512e62438a3a78faf9881d1e7dc"
+    },
+    {
+      "name": "generation_config.json",
+      "bytes": 214,
+      "sha256": "b8eb74d15e0a56623d00ccd14950a4bb87fabbf84b5cc030dcc904b899fb1eb5"
+    },
+    {
+      "name": "model-00001-of-00012.safetensors",
+      "bytes": 2542796928,
+      "sha256": "54d83c1d36631de231876217a8e0c2483eccee8746369a482b79442bdfc5d958"
+    },
+    {
+      "name": "model-00002-of-00012.safetensors",
+      "bytes": 4842451920,
+      "sha256": "464086af08be8e2ec14960a4dcff083ebc39974ade00d79d35497385f960ab3a"
+    },
+    {
+      "name": "model-00003-of-00012.safetensors",
+      "bytes": 4965227944,
+      "sha256": "092212d3a02fafacd6424723eda59d60e5282d2068d68f0e37cb891f63bbb658"
+    },
+    {
+      "name": "model-00004-of-00012.safetensors",
+      "bytes": 4912819264,
+      "sha256": "c0ea3c21955efb99823a2c47d1d9c6a88a2a798083d6286ad59973a49323eb1c"
+    },
+    {
+      "name": "model-00005-of-00012.safetensors",
+      "bytes": 4986198544,
+      "sha256": "2b56c1e3ad52994b82142ac0e2f24b8e1dee4dd240dc5e57b57c6fe15be6b6a6"
+    },
+    {
+      "name": "model-00006-of-00012.safetensors",
+      "bytes": 4912819320,
+      "sha256": "d93485ec554dc6ddd57f40d4fde5c2ae5bbf2d41a117bb062f7e5657097bfe7b"
+    },
+    {
+      "name": "model-00007-of-00012.safetensors",
+      "bytes": 4932703272,
+      "sha256": "811cdd0d47a733b43e6b36f2e172fe302ec19193ab69e7365351de7ffc770e6f"
+    },
+    {
+      "name": "model-00008-of-00012.safetensors",
+      "bytes": 4966314576,
+      "sha256": "d09ff539e07a420f09192c52fed894246b31ffb81e9d627756fc32132ab121b5"
+    },
+    {
+      "name": "model-00009-of-00012.safetensors",
+      "bytes": 4964162248,
+      "sha256": "da0be0478c559431d1bc9f48843398bcfd8c034c5a3413dae2c74f16949ca257"
+    },
+    {
+      "name": "model-00010-of-00012.safetensors",
+      "bytes": 4933789824,
+      "sha256": "228412bd83a580dd73788889ab90729130f8593548fd9d0e2b5d0cf6042e369e"
+    },
+    {
+      "name": "model-00011-of-00012.safetensors",
+      "bytes": 4965228032,
+      "sha256": "b280e76181a9044cc60b470cdd2c7c3c47a170be8ba532b7fac546268e2847c3"
+    },
+    {
+      "name": "model-00012-of-00012.safetensors",
+      "bytes": 2789094896,
+      "sha256": "a00385b08ba3dae7bf301b6d03455605c18c1588c542eff62fa8cd47e71efa83"
+    },
+    {
+      "name": "model-mtp.safetensors",
+      "bytes": 849400424,
+      "sha256": "90fa0e3eed5a647c035c6df9ecabc416c0f8d573ff84ac12485b085f00a7cdf2"
+    },
+    {
+      "name": "model.safetensors.index.json",
+      "bytes": 112085,
+      "sha256": "67dbe83b6c2c36225793a8b56b4ae79a318c882136142f58636ca388e26e623a"
+    },
+    {
+      "name": "processor_config.json",
+      "bytes": 1191,
+      "sha256": "d89ef49ce9cd37fbf510158e13c1ef063d9286411c1ec9049932dbe0487143b1"
+    },
+    {
+      "name": "tokenizer.json",
+      "bytes": 19989325,
+      "sha256": "06b9509352d2af50381ab2247e083b80d32d5c0aba91c272ca9ff729b6a0e523"
+    },
+    {
+      "name": "tokenizer_config.json",
+      "bytes": 1165,
+      "sha256": "792fa3f0cb88b111e54ef3134c873531008c4df471d108da17903426e308aa7b"
+    }
+  ]
+}

@@ -1,0 +1,1 @@
+{"schema_version":1,"benchmark_id":"p6-quality-base-and-uncensored","benchmark_kind":"quality_campaign_status","synthetic":false,"status":"NOT_RUN","base_model":"Qwen3.8-27B-UD-IQ2_XXS.gguf","uncensored_model":null,"quality_gate":"NOT_RUN","reason":"No fixed reference model/corpus and no uncensored quantized artifact; throughput is not a quality score."}

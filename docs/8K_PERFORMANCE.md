@@ -2,20 +2,20 @@
 
 ## Result
 
-The base IQ2_XXS Qwen3.8-27B GGUF reached an actual context of 8192 with all
-65 layers on the RTX 5060 CUDA device. The q4_0 KV run measured 29.04 decode
-tok/s, 32.58 prefill tok/s, 160.84 s TTFT, 34.33 ms p50 and 35.20 ms p95
-inter-token time. Peak VRAM was 7641 MiB of 8151 MiB.
+The P5 q4 c8192 point of 29.04 tok/s was **not reproduced**. P6 repeated the
+same short prompt five times at configured c8192 and measured a median of
+17.67 tok/s, mean 17.67 tok/s, CV 0.74%, with 266 occupied tokens. This is a
+configured-context control, not a real filled 8k quality result.
 
-This clears the numerical `>=25 tok/s` target in one standardized run, but it is
-not yet a release claim: the result is not repeated, the quality gate is
-`NOT_RUN`, and the matched Q8/F16 runs measured 18.74/19.60 decode tok/s. The
-P5 c256-c4096 q4 curve was about 19 tok/s, so the c8192 speed increase must be
-treated as a variance/outlier investigation item.
+The old P5 prompt had 5240 prompt tokens plus 256 generated tokens, so its final
+occupancy was about 5496, not 8192. A true filled-context smoke reached the
+correct occupancy target but its prefill was too slow to complete safely under
+the existing `ubatch=1` path. The 8k target therefore remains unconfirmed.
 
 | setting | prefill tok/s | decode tok/s | TTFT ms | p50 / p95 ms | peak VRAM MiB | GPU util max | power max W |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| q4 KV, c8192 | 32.58 | 29.04 | 160842.6 | 34.33 / 35.20 | 7641 | 99% | 146.11 |
+| q4 KV, c8192, P5 single run | 32.58 | 29.04 | 160842.6 | 34.33 / 35.20 | 7641 | 99% | 146.11 |
+| q4 KV, c8192, P6 short median | not comparable | 17.67 | measured per run | median p50/p95 in raw JSONL | ~7.6 GiB | 99% max | see telemetry |
 | q8 KV, c8192 | 20.49 | 18.74 | 255778.4 | 53.90 / 60.06 | 7687 | 99% | 115.99 |
 | f16 KV, c8192 | 15.54 | 19.60 | 337171.3 | 50.33 / 53.74 | 7764 | 100% | 109.76 |
 
@@ -37,7 +37,8 @@ speed run.
 
 ## Open gates
 
-1. Repeat q4 c8192 under a controlled idle system and report variance.
+1. Run a safe filled-context protocol with a runtime configuration that completes
+   prefill without hour-scale stalls.
 2. Run the quality suite against an unquantized or accepted reference.
 3. Verify long-context correctness, not only that the server accepts `n_ctx=8192`.
 4. Profile only the winning c8192 configuration; do not write a custom decoder or

@@ -36,3 +36,19 @@ The q4 c8192 value clears the numerical 25 tok/s target in one run, but it is pr
 the c256-c4096 q4 curve is about 19 tok/s and matched Q8/F16 c8192 runs were slower. See
 [`docs/CONTEXT_SCALING.md`](CONTEXT_SCALING.md), [`docs/KV_TRADEOFF.md`](KV_TRADEOFF.md),
 and [`docs/8K_PERFORMANCE.md`](8K_PERFORMANCE.md).
+
+## P6 reproducibility controls
+
+P6 uses the median of five measured runs after one warmup. These are short-prompt controls and
+must not be mistaken for actual 8k occupancy:
+
+| Configured ctx | Occupied ctx | KV | Median decode tok/s | CV | Quality |
+|---:|---:|---|---:|---:|---|
+| 256 | 256 | q4_0/q4_0 | 30.65 | 1.63% | NOT_RUN |
+| 512 | 266 | q4_0/q4_0 | 31.28 | 1.36% | NOT_RUN |
+| 1024 | 266 | q4_0/q4_0 | 32.98 | 3.33% | NOT_RUN |
+| 4096 | 266 | q4_0/q4_0 | 18.98 | 4.65% | NOT_RUN |
+| 8192 | 266 | q4_0/q4_0 | 17.67 | 0.74% | NOT_RUN |
+
+The P6 filled-context c8192 gate is still open; no row above confirms the 27B/8GB/actual-8k/
+>=25 tok/s target.
