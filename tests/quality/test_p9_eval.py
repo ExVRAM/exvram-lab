@@ -33,6 +33,8 @@ class P9ProtocolTests(unittest.TestCase):
 
     def test_bbh_accepts_the_last_line(self):
         self.assertTrue(bbh_correct("working...\n(B)", "(B)"))
+        self.assertTrue(bbh_correct("The answer is (B).", "(B)"))
+        self.assertTrue(bbh_correct("C", "(C)"))
         self.assertFalse(bbh_correct("(A)", "(B)"))
 
     def test_gsm8k_uses_the_final_number(self):

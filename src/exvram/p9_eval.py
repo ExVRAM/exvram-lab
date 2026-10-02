@@ -131,6 +131,8 @@ XSTEST = {
 
 _NUMBER = re.compile(r"-?\d[\d,]*(?:\.\d+)?")
 _CHOICE = re.compile(r"\b([A-D])\b", re.IGNORECASE)
+_BBH_CHOICE = re.compile(r"\(([A-D])\)", re.IGNORECASE)
+_BARE_CHOICE = re.compile(r"[A-D]", re.IGNORECASE)
 
 
 def select_ids(ids: Sequence[str], count: int, seed: int = SUBSET_SEED) -> list[str]:
@@ -151,6 +153,16 @@ def normalize_text(text: str) -> str:
     return " ".join(text.strip().lower().split())
 
 
+def _bbh_letter(text: str) -> str | None:
+    wrapped = _BBH_CHOICE.findall(text)
+    if wrapped:
+        return wrapped[-1].upper()
+    stripped = text.strip()
+    if _BARE_CHOICE.fullmatch(stripped):
+        return stripped.upper()
+    return None
+
+
 def bbh_correct(prediction: str, target: str) -> bool:
     want = normalize_text(target)
     if not want:
@@ -158,7 +170,11 @@ def bbh_correct(prediction: str, target: str) -> bool:
     if normalize_text(prediction) == want:
         return True
     lines = [normalize_text(line) for line in prediction.splitlines() if line.strip()]
-    return bool(lines) and lines[-1] == want
+    if lines and lines[-1] == want:
+        return True
+    gold = _bbh_letter(target)
+    guessed = _bbh_letter(prediction)
+    return gold is not None and gold == guessed
 
 
 def _normalize_number(raw: str) -> str | None:
