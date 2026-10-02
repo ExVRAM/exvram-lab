@@ -18,7 +18,7 @@ Current verified milestone:
 
 The 31.39 tok/s figure is the short-context FULL_GPU decode. The 30.10 tok/s figure is the repeated occupied-8192 median. Neither is a quality result.
 
-The product path from here is that same UD-IQ2_XXS + q4_0 KV recipe. Two measurements are still open: the quality gate, which is `NOT_RUN`, and the same pipeline on the local Coletti text-only BF16 after a finished imatrix. The 53,808,282,560-byte GGUF is present; the matching IQ2_XXS is not. P8 1-bit, HQQ, PB-LLM, and BiLLM research is frozen on `experiment/p8-low-bit` and is not part of this path.
+The product path from here is that same UD-IQ2_XXS + q4_0 KV recipe, in three phases. P9 is quality and refusal, including a finished Coletti imatrix and IQ2_XXS. P10 splits prefill, time to first token, and decode, then closes the KV matrix before any speculative decoding. P11 is a thin runtime over the existing backend and a Hugging Face card, not a new engine and not a git weight commit. Details are in [docs/ROADMAP.md](docs/ROADMAP.md). P8 stays frozen on `experiment/p8-low-bit`.
 
 ## Research goals
 
@@ -212,14 +212,13 @@ This command checks `ollama list` first and never downloads a missing model.
 
 ## Research roadmap
 
-- P0 — infrastructure and memory planner.
-- P1 — real layer-level GPU measurements. Recorded for the fixtures in this repo; not a full-model claim.
-- P2 — full-model OSS shootout. A context-128 llama.cpp smoke exists; quality and a matched runtime comparison remain open.
-- P3 — bottleneck-specific optimization, only after a measured full-model gap.
-- P4 — optional ExVRAM runtime or orchestrator, only if existing runtimes still leave a measured gap.
-- P5 — context scaling and KV precision. P6 then repeated an occupied 8192-token prompt at 30.10 tok/s median. Quality gating is still open.
+P0 through P6 are the recorded lab history. The occupied-8192 speed result closed the hardware question. The forward plan is [docs/ROADMAP.md](docs/ROADMAP.md):
 
-The minimal-refusal track does not replace that order. It runs beside the FULL_GPU work: pick a published abliterated BF16 checkpoint, quantize it with an existing tool, then compare VRAM, tok/s, quality, and refusal rate at a matched quant. Details are in [docs/UNCENSORED_OSS_MATRIX.md](docs/UNCENSORED_OSS_MATRIX.md).
+- P9 — quality gate, Coletti IQ2_XXS, refusal and over-refusal. Active. All three are `NOT_RUN`.
+- P10 — prefill, time to first token, and decode reported separately; finish f16 KV; speculative decoding only after that.
+- P11 — ExVRAM Runtime as an orchestrator, then one Hugging Face artifact with provenance and the measured numbers.
+
+P8 1-bit research stays on `experiment/p8-low-bit` and does not gate P9. No first-party CUDA kernel until a named measured gap exists.
 
 ## License
 
