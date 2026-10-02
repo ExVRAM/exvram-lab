@@ -34,13 +34,15 @@ REASONING_PER_TASK = 20
 LONG_CONTEXT_PER_LENGTH = 15
 LONG_CONTEXT_LENGTHS = (2048, 4096, 8192)
 N_PREDICT = {
-    "reasoning": 64,
-    "math": 256,
+    "reasoning": 512,
+    "math": 768,
     "coding": 512,
     "factual": 16,
-    "instruction": 256,
-    "long_context": 32,
+    "instruction": 768,
+    "long_context": 64,
 }
+# Leave cores for the desktop. This does not change tokens, only host load.
+P9_THREADS = 4
 CODING_STOP = ["\nclass ", "\ndef ", "\n#", "\nif ", "\nprint("]
 
 # PASS ratios are the acceptance bar. A complete result that misses them is FAIL.

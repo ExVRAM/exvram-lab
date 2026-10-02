@@ -11,6 +11,7 @@ import gzip
 import json
 import os
 import sys
+import time
 import urllib.error
 import urllib.request
 from pathlib import Path
@@ -25,6 +26,7 @@ from exvram.p9_eval import (
     LONG_CONTEXT_LENGTHS,
     LONG_CONTEXT_PER_LENGTH,
     N_PREDICT,
+    P9_THREADS,
     PROTOCOL_ID,
     REASONING_PER_TASK,
     SAMPLE_COUNTS,
@@ -249,6 +251,37 @@ def load_static_items(cache: Path) -> list[dict[str, Any]]:
     return items
 
 
+def _limit_threads(command: list[str], threads: int = P9_THREADS) -> list[str]:
+    """Keep a few cores for the desktop. The token stream is unchanged."""
+    limited: list[str] = []
+    skip_next = False
+    for part in command:
+        if skip_next:
+            skip_next = False
+            continue
+        if part in {"--threads", "--threads-batch"}:
+            limited.extend([part, str(threads)])
+            skip_next = True
+            continue
+        limited.append(part)
+    return limited
+
+
+def _erase_slot(port: int) -> None:
+    """Drop leftover KV so the next prompt is not a continuation."""
+    request = urllib.request.Request(
+        f"http://127.0.0.1:{port}/slots/0?action=erase",
+        data=b"{}",
+        headers={"Content-Type": "application/json"},
+        method="POST",
+    )
+    try:
+        with urllib.request.urlopen(request, timeout=5) as response:
+            response.read()
+    except (OSError, urllib.error.URLError):
+        return
+
+
 def _post_json(port: int, path: str, payload: dict[str, Any], timeout: float) -> dict[str, Any]:
     request = urllib.request.Request(
         f"http://127.0.0.1:{port}{path}",
@@ -296,7 +329,8 @@ def _needle_prompt(port: int, index: int, length: int) -> tuple[str, str, str, i
 
 
 def _generate(port: int, item: dict[str, Any]) -> dict[str, Any]:
-    timeout = 900 if item["category"] == "long_context" else 180
+    _erase_slot(port)
+    timeout = 900 if item["category"] == "long_context" else 300
     if item["mode"] == "completion":
         payload = {
             "prompt": item["prompt"],
@@ -458,7 +492,7 @@ def main() -> int:
     log_path = work / "p9_server.log"
     log_handle = log_path.open("w", encoding="utf-8")
     port = _pick_port()
-    command = _server_command(args, args.context, port)
+    command = _limit_threads(_server_command(args, args.context, port))
     import subprocess
 
     process = subprocess.Popen(
@@ -576,6 +610,7 @@ def _run_item(
     measured.append(record)
     status = record["measurement_status"]
     print(f"{item['sample_id']} {status} correct={record.get('correct')}", flush=True)
+    time.sleep(0.25)
 
 
 if __name__ == "__main__":

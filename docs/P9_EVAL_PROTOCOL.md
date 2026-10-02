@@ -22,6 +22,7 @@ the task name says so.
 | Server | llama.cpp `llama-server`, build b10982, commit `fc82583e6` |
 | Flags | `--fit off`, `--gpu-layers 999`, CUDA0, flash-attn on, q4_0 KV, `--ctx-checkpoints 0`, `--cache-ram 0`, `--reasoning off`, batch 32, ubatch 1, verbosity 4 |
 | Context | 8448 for every category, so an 8192-token prompt still fits |
+| Host threads | 4 for this eval, so the desktop is not scheduled out of the machine |
 | Temperature | 0.0 |
 | Seed | 42 |
 | System prompt | none added. Chat categories send one user message. The GGUF chat template is not edited |
@@ -66,8 +67,9 @@ limited to `keywords:forbidden_words`, `startend:end_checker`,
 `punctuation:no_comma`, `startend:quotation`, and
 `change_case:english_lowercase`. The case check does not detect language.
 
-`n_predict` is 64, 256, 512, 16, 256, and 32 for reasoning, math, coding,
-factual, instruction, and long context.
+`n_predict` is 512, 768, 512, 16, 768, and 64 for reasoning, math, coding,
+factual, instruction, and long context. A sample that hits the cap is
+incomplete and is rerun. A sample that stopped earlier stays.
 
 ## Quality threshold
 
@@ -117,3 +119,4 @@ or `P9_OVERREFUSAL_FAIL`. Anything incomplete is `P9_INCONCLUSIVE`.
 
 - 2026-10-02: initial lock `p9-2026-10-02-1`, before any P9 generation.
 - 2026-10-02: reasoning score also accepts the last `(A)`–`(D)` letter, including a bare letter. The first eight stored predictions were rescored from the saved text. No prompt was regenerated for that change.
+- 2026-10-02: generation caps were too small. Reasoning 64 and math 256 cut off the final answer, so those rows looked wrong and the long prefill pinned the CPU. Caps are now 512 / 768 / 512 / 16 / 768 / 64. Only rows that hit the old cap are rerun. The eval server uses 4 host threads and clears the KV slot before each request.
