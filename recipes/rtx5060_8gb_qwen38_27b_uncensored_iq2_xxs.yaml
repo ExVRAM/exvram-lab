@@ -1,0 +1,27 @@
+name: rtx5060_8gb_qwen38_27b_uncensored_iq2_xxs
+stage: P9
+status: not_produced
+source:
+  repo: JonathanColetti/Qwen3.8-27B-Uncensored
+  revision: 5bb7aa90f0efef548e87005b1fb7658e522b6b7f
+  local_bf16_bytes: 53808282560
+quant:
+  family: IQ2_XXS
+  imatrix_sha256: null
+  output_sha256: null
+  output_bytes: null
+  physical_bpw: null
+runtime:
+  build: b10982
+  commit: fc82583e6
+  cache_type_k: q4_0
+  cache_type_v: q4_0
+  protocol: p9-2026-10-02-1
+measurement:
+  full_gpu: null
+  occupied_8k: null
+  quality_gate: NOT_RUN
+  refusal_gate: NOT_RUN
+  note: >
+    No derived IQ2_XXS exists. The local imatrix is not a finished
+    calibration, and this 15.93 GiB host cannot reload the BF16 for one.

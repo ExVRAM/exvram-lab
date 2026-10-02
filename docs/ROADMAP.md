@@ -11,7 +11,9 @@ reproduced, and whether another user can launch it.
 
 ## P9 — Quality and refusal validation
 
-This is the active phase.
+This is the active phase. The locked rules are
+[P9_EVAL_PROTOCOL.md](P9_EVAL_PROTOCOL.md). The current verdict is
+`P9_INCONCLUSIVE` in [P9_FINAL.md](P9_FINAL.md).
 
 1. Base quality gate against a higher-quality reference of the same model
    family. Same tokenizer, prompts, seed, and decoding settings. Suites:
