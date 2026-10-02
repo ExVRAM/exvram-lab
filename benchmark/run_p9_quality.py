@@ -485,9 +485,10 @@ def main() -> int:
     work = Path(args.work_dir)
     work.mkdir(parents=True, exist_ok=True)
     gpu = _gpu_snapshot()
+    # The idle desktop sits near 1.2 GiB. A second model is several GiB.
     background_mib = gpu.get("memory_used_mib", 0)
-    if not args.allow_contended_gpu and gpu.get("available") and background_mib > 1024:
-        raise SystemExit(f"background VRAM {gpu.get('memory_used_mib')} MiB is above 1024")
+    if not args.allow_contended_gpu and gpu.get("available") and background_mib > 2048:
+        raise SystemExit(f"background VRAM {gpu.get('memory_used_mib')} MiB is above 2048")
 
     log_path = work / "p9_server.log"
     log_handle = log_path.open("w", encoding="utf-8")
