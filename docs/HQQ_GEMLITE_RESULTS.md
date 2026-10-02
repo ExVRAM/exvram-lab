@@ -2,6 +2,8 @@
 
 ## Status
 
+Frozen on `experiment/p8-low-bit` (`9c93171`). This track is not the product path.
+
 The P8 integration boundary and experiment matrix are present, but this report
 contains no measured CUDA result yet. The current machine/session did not have a
 safe idle VRAM slot for another GPU run, and the default CPU environment does

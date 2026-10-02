@@ -1,5 +1,7 @@
 # P8 PB-LLM reference track
 
+Status: frozen on `experiment/p8-low-bit` (`9c93171`). This track is not the product path.
+
 [PB-LLM](https://github.com/hahnyuan/PB-LLM) is used as an MIT-licensed
 algorithmic reference only. Its partially binarized idea is represented in the
 planner as binary weights plus a high-bit salient subset, a bitmap, and group

@@ -1,5 +1,7 @@
 # P8 BiLLM reference track
 
+Status: frozen on `experiment/p8-low-bit` (`9c93171`). This track is not the product path.
+
 [BiLLM](https://github.com/Aaronhuang-778/BiLLM) is an MIT-licensed external
 reference for 1-bit model feasibility. ExVRAM does not copy its training or
 runtime code and does not present the paper's reported average bit width as a

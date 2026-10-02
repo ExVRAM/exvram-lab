@@ -18,6 +18,8 @@ Current verified milestone:
 
 The 31.39 tok/s figure is the short-context FULL_GPU decode. The 30.10 tok/s figure is the repeated occupied-8192 median. Neither is a quality result.
 
+The product path from here is that same UD-IQ2_XXS + q4_0 KV recipe. Two measurements are still open: the quality gate, which is `NOT_RUN`, and the same pipeline on the local Coletti text-only BF16 after a finished imatrix. The 53,808,282,560-byte GGUF is present; the matching IQ2_XXS is not. P8 1-bit, HQQ, PB-LLM, and BiLLM research is frozen on `experiment/p8-low-bit` and is not part of this path.
+
 ## Research goals
 
 - Dense ~27B on 8 GB consumer GPU
@@ -96,7 +98,7 @@ Confirmed in this repository as of 2026-09-26:
 - The requested c128 setting is currently clamped to actual n_ctx=256 by this llama.cpp/model combination. No 8k quality result is claimed; the quality gate remains NOT_RUN.
 - Occupied 8192-token prompt on UD-IQ2_XXS, 65/65 CUDA, q4_0 KV: median decode 30.10 tok/s, five runs, CV 2.0%. Quality is still `NOT_RUN`. See [docs/P6_FINAL_RESULT.md](docs/P6_FINAL_RESULT.md).
 - Minimal-refusal sources were inventoried on 2026-09-24. No uncensored checkpoint was loaded on this GPU. Refusal rate, quality delta, decode, and 8k fit for those files are not ExVRAM measurements. The decision gate is `REQUANTIZATION_REQUIRED`. See [docs/UNCENSORED_PARETO.md](docs/UNCENSORED_PARETO.md).
-- P8 binary research scaffolding is present: real Qwen3.8-27B layer shapes, physical-bpw planner, HQQ adapter boundary, and PB-LLM/BiLLM reference records. P8 quality, CUDA timing, and full-model results are `NOT_RUN`; no production recipe changed. See [docs/BINARY_1BIT_RESEARCH.md](docs/BINARY_1BIT_RESEARCH.md).
+- P8 1-bit, HQQ, PB-LLM, and BiLLM research is frozen on `experiment/p8-low-bit` (`9c93171`). The scaffolding stays in the tree as reference. P8 quality, CUDA timing, and full-model results are `NOT_RUN`, and that track does not change the production recipe. See [docs/BINARY_1BIT_RESEARCH.md](docs/BINARY_1BIT_RESEARCH.md).
 
 Layer benchmarks are not full-model results. Nominal bits per weight are not physical bits per weight. Details are in [docs/P1_REAL_GPU_RESULTS.md](docs/P1_REAL_GPU_RESULTS.md), [docs/P2_RESULTS.md](docs/P2_RESULTS.md), and [docs/GPU_ENVIRONMENT.md](docs/GPU_ENVIRONMENT.md).
 

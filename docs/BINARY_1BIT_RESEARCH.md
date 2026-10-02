@@ -1,7 +1,9 @@
 # P8 — Frequent-Group 1-Bit / Binary Representation
 
-P8 is an isolated research track. It does not replace the measured P4/P5/P6
-runtime results and it does not change the current production recipe.
+P8 is a frozen research track on `experiment/p8-low-bit` (`9c93171`). It does
+not replace the measured P6 runtime result and it does not change the
+production recipe. Further 1-bit, HQQ, PB-LLM, and BiLLM work stays on that
+branch.
 
 ## Research question
 
