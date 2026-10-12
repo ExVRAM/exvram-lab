@@ -1,6 +1,11 @@
 # P9 BF16 reference plan
 
-Status: **NOT_RUN**. This file is a launch plan. It does not add scores.
+Status: **NOT_RUN**. Cloud rental in this file is withdrawn. On 2026-10-12
+the operator limited every ExVRAM run to this PC. See
+[P9_BF16_LOCAL_FEASIBILITY.md](P9_BF16_LOCAL_FEASIBILITY.md). Do not rent a
+GPU and do not call a remote endpoint.
+
+This file is a launch plan. It does not add scores.
 The comparison gate stays `REFERENCE_UNAVAILABLE`. The pass ratios in
 [P9_EVAL_PROTOCOL.md](P9_EVAL_PROTOCOL.md) are unchanged. No cloud machine
 was rented and the official weights were not downloaded again.
