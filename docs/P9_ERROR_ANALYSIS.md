@@ -11,9 +11,9 @@ NOT_RUN for every class.
 | Reasoning, no letter | 9 | Prose answer. Example gold `(A)`, prediction `The blue jay is the rightmost.` |
 | Reasoning, gold letter present but not scored | 2 | The letter appears, and the locked letter rule still marked the row wrong |
 | Reasoning, empty | 1 | Empty prediction |
-| Reasoning, cut off at `n_predict` 64 | 2 | Both wrong. Protocol says these are rerun at 512. They were not |
-| Math, wrong final number, generation finished | 4 | Last number differs from the `####` gold. Not a cap hit |
-| Math, cut off at `n_predict` 256 | 7 | All 7 are wrong. Protocol says these are rerun at 768. They were not |
+| Reasoning, cut off at the locked cap of 512 | 2 | `OUTPUT_TRUNCATION`. Both wrong. The cap is already the locked value |
+| Math, wrong final number, generation finished | 4 | `MODEL_FAILURE` on this arm. `gsm8k:700` stopped at 244 of 256. `gsm8k:590`, `gsm8k:990`, and `gsm8k:125` stopped before 768 |
+| Math, cut off at the locked cap of 768 | 7 | `OUTPUT_TRUNCATION`. All 7 are wrong. The trailing number is not a finished answer |
 | Factual, wrong A/B | 20 | Choice present, opposite of gold. None hit the 16-token cap |
 | Instruction check failed | 6 | 39 of 45 passed. Five of the locked 50 were not generated |
 | Coding | 0 | NOT_RUN |
@@ -26,11 +26,11 @@ task whose score requires a letter. One of those is the blue-jay sentence
 above (`logical_deduction_three_objects:117`). A wrong-letter example is
 `logical_deduction_three_objects:13`: gold `(A)`, prediction `The answer is (C).`
 
-Math misses that finished are arithmetic or setup errors, not empty answers.
-`gsm8k:590` gold is 319 and the last number in the prediction is 318.
-`gsm8k:700` gold is 135 and the last number is 35. The seven truncated math
-rows cannot be called arithmetic failures until they are regenerated at 768
-tokens. `gsm8k:1070` is one of the finished misses: gold 18, last number 1.5.
+Finished math misses are arithmetic or setup errors. `gsm8k:590` gold is
+319 and the last number in the prediction is 318. `gsm8k:700` gold is 135
+and the last number is 35. The seven rows that filled 768 tokens are
+`OUTPUT_TRUNCATION`, including `gsm8k:1070`. Their last number is taken
+from a cut answer.
 
 Factual errors are swapped choices, for example `truthfulqa:e854cb7fcd9338e6`
 gold `B`, prediction `A`. That is a knowledge or selection error under this

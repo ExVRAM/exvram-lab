@@ -15,7 +15,8 @@
       "n": 60,
       "accuracy": 0.55,
       "wilson95": [0.425, 0.669],
-      "old_cap_hits_not_rerun": 2,
+      "locked_cap_hits": 2,
+      "older_cap_stopped_early": 47,
       "delta_vs_bf16": "NOT_RUN"
     },
     "math": {
@@ -25,7 +26,8 @@
       "n": 100,
       "accuracy": 0.89,
       "wilson95": [0.814, 0.937],
-      "old_cap_hits_not_rerun": 7,
+      "locked_cap_hits": 7,
+      "older_cap_stopped_early": 40,
       "delta_vs_bf16": "NOT_RUN"
     },
     "factual": {
@@ -35,7 +37,7 @@
       "n": 100,
       "accuracy": 0.8,
       "wilson95": [0.711, 0.867],
-      "old_cap_hits_not_rerun": 0,
+      "locked_cap_hits": 0,
       "delta_vs_bf16": "NOT_RUN"
     },
     "instruction": {
@@ -44,6 +46,9 @@
       "correct": 39,
       "n": 45,
       "protocol_n": 50,
+      "locked_cap_hits": 3,
+      "older_cap_stopped_early": 9,
+      "missing_ids": ["ifeval:1893", "ifeval:2010", "ifeval:2828", "ifeval:2534", "ifeval:1580"],
       "accuracy": 0.8667,
       "wilson95": [0.738, 0.937],
       "delta_vs_bf16": "NOT_RUN"

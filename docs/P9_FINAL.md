@@ -7,8 +7,8 @@ Program verdict: **`P9_INCONCLUSIVE`**. P10 does not start.
 Official Qwen3.8-27B BF16 was not run. UD-IQ2_XXS has a partial absolute
 suite only. That cannot support `QUALITY_PRESERVED_WITHIN_MARGIN`,
 `QUALITY_DEGRADED`, `QUALITY_MIXED`, or any zero-loss label. Coding, long
-context, Coletti IQ2, and both refusal gates are missing. Nine math and
-reasoning rows still sit on the old token cap.
+context, Coletti IQ2, and both refusal gates are missing. Twelve rows
+filled the locked output cap. See [P9_BF16_REFERENCE_PLAN.md](P9_BF16_REFERENCE_PLAN.md).
 
 `P9_SUCCESS` is not available from the P6 speed result.
 
@@ -19,7 +19,7 @@ reasoning rows still sit on the old token cap.
 | Items scored | 305. Locked suite is 60+100+40+100+50+45 = 395, plus refusal |
 | Benchmarks | BBH three tasks, GSM8K, TruthfulQA binary, IFEval subset. HumanEval and the needle set were not run |
 | Reasoning delta | NOT_RUN. Absolute 33/60 |
-| Math delta | NOT_RUN. Absolute 89/100, of which 7 misses are truncated |
+| Math delta | NOT_RUN. Absolute 89/100. Four misses finished. Seven filled the locked cap of 768 |
 | Coding delta | NOT_RUN |
 | Knowledge delta | NOT_RUN. Absolute 80/100 |
 | Instruction delta | NOT_RUN. Absolute 39/45 |
@@ -32,7 +32,7 @@ reasoning rows still sit on the old token cap.
 | Practical use | Factual 80/100 and the finished math rows are usable evidence that this file answers those items. They are not a retention rate |
 | Reliable so far | TruthfulQA binary at 0.800, n=100, no cap hits |
 | Not established | Coding, long context, quantization loss, layer blame |
-| Next experiment | Same item ids on official BF16, on a host that can hold it. On this PC, only if free RAM recovers: rerun the 9 cap-hit rows, the 5 missing IFEval items, HumanEval 40, then the needle set |
+| Next experiment | Official BF16 on another machine, after confirmation of the plan and the cost. On this PC, after a free window and more free RAM: the 5 missing IFEval items, HumanEval 40, then the needle set. Do not rerun the 12 locked-cap rows at the same cap |
 | Coletti IQ2 bytes | not produced |
 | Refusal rates | not measured |
 | P10 | no |

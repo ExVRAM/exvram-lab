@@ -13,13 +13,15 @@ They are not a loss against BF16.
 
 Verdict: `BASE_QUALITY_INCONCLUSIVE`. `quality_verdict` returns
 `INCONCLUSIVE` when the reference is missing. Coding and long context have
-no samples. Instruction has 45 of the locked 50. Two reasoning rows and
-seven math rows hit the old token cap and were not rerun at 512 / 768.
+no samples. Instruction has 45 of the locked 50. Twelve rows filled the
+locked cap (2 reasoning at 512, 7 math at 768, 3 instruction at 768).
+Ninety-six rows were generated with the older cap and stopped before it;
+the protocol keeps those.
 
 | Category | Correct / scored | Wilson 95% | Protocol n | Status |
 |---|---:|---|---:|---|
-| Reasoning | 33/60 (0.550) | 0.425–0.669 | 60 | MEASURED, not closed: 2 rows hit `n_predict` 64 |
-| Math | 89/100 (0.890) | 0.814–0.937 | 100 | MEASURED, not closed: 7 rows hit `n_predict` 256 |
+| Reasoning | 33/60 (0.550) | 0.425–0.669 | 60 | MEASURED. 47 rows stopped under the old cap of 64. 2 rows filled the locked cap of 512 |
+| Math | 89/100 (0.890) | 0.814–0.937 | 100 | MEASURED. 40 rows stopped under the old cap of 256. 7 rows filled the locked cap of 768 |
 | Factual | 80/100 (0.800) | 0.711–0.867 | 100 | MEASURED. None hit the cap of 16 |
 | Instruction | 39/45 (0.867) | 0.738–0.937 | 50 | MEASURED, short by 5 items |
 | Coding | — | — | 40 | NOT_RUN |
@@ -32,9 +34,11 @@ tracking shuffled objects 9/20 (0.258–0.658), date understanding 10/20
 Stored decoding is temperature 0.0, seed 42, no added system prompt, chat
 mode. The token cap is mixed: reasoning 47 rows at 64 and 13 at 512; math
 40 at 256 and 60 at 768; instruction 9 at 256 and 36 at 768; factual 100
-at 16. The locked caps are 512 / 768 / 512 / 16 / 768 / 64. Rows that
-stopped before the old cap were kept, which matches the changelog. Rows
-that hit the old cap were not rerun.
+at 16. The locked caps are 512 / 768 / 512 / 16 / 768 / 64. Every row
+generated under an older cap stopped before that cap, so the changelog
+keeps it. The 12 truncated rows already used the locked cap. Running them
+again at the same cap does not remove the cut. Raising the cap is a new
+protocol and has not been done.
 
 The continuation was not started on 2026-10-12. GPU was idle (4%, 38 C,
 19.9 W, 1367 MiB used of 8151). Free physical RAM was about 4.7 GB of
