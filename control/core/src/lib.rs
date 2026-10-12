@@ -2,6 +2,7 @@
 
 pub mod estimate;
 pub mod gpu;
+pub mod host;
 pub mod launch;
 pub mod recipe;
 pub mod recommend;
@@ -11,6 +12,7 @@ pub mod storage;
 
 pub use estimate::{estimate, launch_gate, KvFormat, MemoryEstimate, CONTEXT_PRESETS};
 pub use gpu::{parse_nvidia_smi_line, GpuSample};
+pub use host::{host_pressure, HostDecision, HostSample};
 pub use launch::{server_arguments, thread_count, LaunchRequest};
 pub use recipe::parse_recipe_yaml;
 pub use recommend::recommend;

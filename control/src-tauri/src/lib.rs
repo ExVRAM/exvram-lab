@@ -11,6 +11,7 @@ use std::time::Duration;
 
 use exvram_control_core::estimate::{estimate, launch_gate, preset_allowed, KvFormat, CONTEXT_PRESETS};
 use exvram_control_core::gpu::parse_nvidia_smi_line;
+use exvram_control_core::host::{host_pressure, HostSample};
 use exvram_control_core::launch::{server_arguments, LaunchRequest};
 use exvram_control_core::recipe::{identity_matches, parse_recipe_yaml, PublishedRecipe};
 use exvram_control_core::recommend::recommend;
@@ -232,6 +233,39 @@ fn discover_server(root: &Path) -> Option<PathBuf> {
 
 fn logical_cpus(system: &System) -> u32 {
     system.cpus().len().max(1) as u32
+}
+
+fn commit_free_bytes() -> Option<u64> {
+    #[cfg(windows)]
+    {
+        #[repr(C)]
+        struct MemoryStatusEx {
+            length: u32,
+            memory_load: u32,
+            total_phys: u64,
+            avail_phys: u64,
+            total_page_file: u64,
+            avail_page_file: u64,
+            total_virtual: u64,
+            avail_virtual: u64,
+            avail_extended_virtual: u64,
+        }
+        extern "system" {
+            fn GlobalMemoryStatusEx(status: *mut MemoryStatusEx) -> i32;
+        }
+        unsafe {
+            let mut status = std::mem::zeroed::<MemoryStatusEx>();
+            status.length = std::mem::size_of::<MemoryStatusEx>() as u32;
+            if GlobalMemoryStatusEx(&mut status) == 0 {
+                return None;
+            }
+            Some(status.avail_page_file)
+        }
+    }
+    #[cfg(not(windows))]
+    {
+        None
+    }
 }
 
 fn sample_gpu() -> Result<exvram_control_core::GpuSample, String> {
@@ -1059,11 +1093,16 @@ fn start(app: AppHandle, state: State<'_, AppState>) -> Result<Panel, String> {
         notify(&app, reason);
         return Ok(build_panel(&mut inner));
     }
-    let available = inner.system.available_memory();
-    if settings.protect_pc && available < 1536 * 1024 * 1024 {
-        let reason = "Свободной RAM меньше 1.5 ГиБ. Запуск отменён, чтобы не увести систему в pagefile.";
-        inner.notice = reason.into();
-        notify(&app, reason);
+    let host = host_pressure(
+        HostSample {
+            ram_available_bytes: inner.system.available_memory(),
+            commit_free_bytes: commit_free_bytes(),
+        },
+        settings.protect_pc,
+    );
+    if !host.allowed {
+        inner.notice = host.reason.clone();
+        notify(&app, &host.reason);
         return Ok(build_panel(&mut inner));
     }
     let port = free_port()?;
