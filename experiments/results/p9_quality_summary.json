@@ -1,0 +1,71 @@
+{
+  "protocol": "p9-2026-10-02-1",
+  "comparison_gate": "REFERENCE_UNAVAILABLE",
+  "program_verdict": "P9_INCONCLUSIVE",
+  "reference_kind": "UNAVAILABLE",
+  "model_role": "base_iq2_xxs",
+  "model_sha256": "e792d8fb3142fe6d9171876d6da0f71f05a71028718debc72dbec93ff645e67d",
+  "model_bytes": 7266070528,
+  "samples_scored": 305,
+  "categories": {
+    "reasoning": {
+      "status": "MEASURED",
+      "closed": false,
+      "correct": 33,
+      "n": 60,
+      "accuracy": 0.55,
+      "wilson95": [0.425, 0.669],
+      "locked_cap_hits": 2,
+      "older_cap_stopped_early": 47,
+      "delta_vs_bf16": "NOT_RUN"
+    },
+    "math": {
+      "status": "MEASURED",
+      "closed": false,
+      "correct": 89,
+      "n": 100,
+      "accuracy": 0.89,
+      "wilson95": [0.814, 0.937],
+      "locked_cap_hits": 7,
+      "older_cap_stopped_early": 40,
+      "delta_vs_bf16": "NOT_RUN"
+    },
+    "factual": {
+      "status": "MEASURED",
+      "closed": true,
+      "correct": 80,
+      "n": 100,
+      "accuracy": 0.8,
+      "wilson95": [0.711, 0.867],
+      "locked_cap_hits": 0,
+      "delta_vs_bf16": "NOT_RUN"
+    },
+    "instruction": {
+      "status": "MEASURED",
+      "closed": false,
+      "correct": 39,
+      "n": 45,
+      "protocol_n": 50,
+      "locked_cap_hits": 3,
+      "older_cap_stopped_early": 9,
+      "missing_ids": ["ifeval:1893", "ifeval:2010", "ifeval:2828", "ifeval:2534", "ifeval:1580"],
+      "accuracy": 0.8667,
+      "wilson95": [0.738, 0.937],
+      "delta_vs_bf16": "NOT_RUN"
+    },
+    "coding": {"status": "NOT_RUN", "delta_vs_bf16": "NOT_RUN"},
+    "long_context": {"status": "NOT_RUN", "delta_vs_bf16": "NOT_RUN"}
+  },
+  "reasoning_tasks": {
+    "logical_deduction_three_objects": {"correct": 14, "n": 20, "wilson95": [0.481, 0.855]},
+    "tracking_shuffled_objects_three_objects": {"correct": 9, "n": 20, "wilson95": [0.258, 0.658]},
+    "date_understanding": {"correct": 10, "n": 20, "wilson95": [0.299, 0.701]}
+  },
+  "arms": {
+    "A_bf16": "NOT_RUN",
+    "B_iq2": "MEASURED_PARTIAL",
+    "C_coletti_bf16": "NOT_RUN",
+    "D_coletti_iq2": "NOT_RUN",
+    "E_bonsai": "NOT_RUN"
+  }
+}

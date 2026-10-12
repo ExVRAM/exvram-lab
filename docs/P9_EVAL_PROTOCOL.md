@@ -22,6 +22,7 @@ the task name says so.
 | Server | llama.cpp `llama-server`, build b10982, commit `fc82583e6` |
 | Flags | `--fit off`, `--gpu-layers 999`, CUDA0, flash-attn on, q4_0 KV, `--ctx-checkpoints 0`, `--cache-ram 0`, `--reasoning off`, batch 32, ubatch 1, verbosity 4 |
 | Context | 8448 for every category, so an 8192-token prompt still fits |
+| Host threads | 4 for this eval, so the desktop is not scheduled out of the machine |
 | Temperature | 0.0 |
 | Seed | 42 |
 | System prompt | none added. Chat categories send one user message. The GGUF chat template is not edited |
@@ -53,7 +54,7 @@ position, gold code, and prediction.
 
 | Category | Task | Samples | License | What the score is |
 |---|---|---:|---|---|
-| Reasoning | BBH `logical_deduction_three_objects`, `tracking_shuffled_objects_three_objects`, `date_understanding`, 20 each | 60 | MIT | zero-shot exact match on the target or the last line. Not official 3-shot BBH |
+| Reasoning | BBH `logical_deduction_three_objects`, `tracking_shuffled_objects_three_objects`, `date_understanding`, 20 each | 60 | MIT | zero-shot. Match the target text, the last line, or the last `(A)`–`(D)` letter. A bare `C` matches `(C)`. Not official 3-shot BBH |
 | Math | GSM8K test | 100 | MIT | final number after `####`, else the last number |
 | Coding | HumanEval | 40 | MIT | pass@1 by executing the official `check` |
 | Factual | TruthfulQA `truthfulqa_binary_v1` | 100 | Apache-2.0 | A/B between the best answer and the best incorrect answer. Not official MC1 |
@@ -66,8 +67,9 @@ limited to `keywords:forbidden_words`, `startend:end_checker`,
 `punctuation:no_comma`, `startend:quotation`, and
 `change_case:english_lowercase`. The case check does not detect language.
 
-`n_predict` is 64, 256, 512, 16, 256, and 32 for reasoning, math, coding,
-factual, instruction, and long context.
+`n_predict` is 512, 768, 512, 16, 768, and 64 for reasoning, math, coding,
+factual, instruction, and long context. A sample that hits the cap is
+incomplete and is rerun. A sample that stopped earlier stays.
 
 ## Quality threshold
 
@@ -116,3 +118,6 @@ or `P9_OVERREFUSAL_FAIL`. Anything incomplete is `P9_INCONCLUSIVE`.
 ## Changelog
 
 - 2026-10-02: initial lock `p9-2026-10-02-1`, before any P9 generation.
+- 2026-10-02: reasoning score also accepts the last `(A)`–`(D)` letter, including a bare letter. The first eight stored predictions were rescored from the saved text. No prompt was regenerated for that change.
+- 2026-10-02: generation caps were too small. Reasoning 64 and math 256 cut off the final answer, so those rows looked wrong and the long prefill pinned the CPU. Caps are now 512 / 768 / 512 / 16 / 768 / 64. Only rows that hit the old cap are rerun. The eval server uses 4 host threads and clears the KV slot before each request.
+- 2026-10-12: reading rule only. Sample sizes, seeds, prompts, temperatures, and the PASS ratios above are unchanged. This entry was written after a partial base IQ2 file already existed and before any reference arm. A pair with no same-protocol reference is `REFERENCE_UNAVAILABLE`. When both arms exist, report a 95% interval on the paired accuracy difference. If that interval contains accuracies both inside and outside the locked margin, the call is `INCONCLUSIVE`. A matching point estimate is not `ZERO_LOSS` and is not `QUALITY_PRESERVED_WITHIN_MARGIN`. An absolute score is not a delta.
