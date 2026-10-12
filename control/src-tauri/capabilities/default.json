@@ -1,0 +1,6 @@
+{
+  "identifier": "default",
+  "description": "Local panel. No shell, no remote hosts.",
+  "windows": ["main"],
+  "permissions": ["core:default", "notification:default"]
+}
