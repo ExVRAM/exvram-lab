@@ -57,8 +57,10 @@ q4 recipe when it fits. Quality does not pick a heavier KV.
 On by default. The panel uses 4 threads, below-normal priority, and direct
 I/O. It refuses to start when another program already holds more than 2048 MiB
 of VRAM, when the estimate does not leave 256 MiB on the card, when the GGUF
-is larger than physical RAM, or when less than 1.5 GiB of RAM is free. It does
-not close other programs and does not change the pagefile.
+is larger than physical RAM, when less than 1.5 GiB of RAM is free, or when
+Windows commit headroom is under 2 GiB. It does not close other programs and
+does not change the pagefile. Turning Protect My PC off skips the RAM and
+commit floors; the file-larger-than-RAM check stays.
 
 Context and KV changes apply on the next start. The running server is left
 alone until Stop.
