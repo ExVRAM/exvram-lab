@@ -49,3 +49,5 @@ Thumbs.db
 .ninja_log
 CMakeFiles/
 cmake-build-*/
+control/src-tauri/target/
+control/src-tauri/gen/schemas/
