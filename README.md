@@ -4,7 +4,7 @@
 
 ExVRAM Lab is an open-source research project focused on running larger dense LLMs on memory-constrained consumer GPUs by combining ultra-low-bit representations, full-GPU residency, memory-aware runtime configuration and existing open-source inference technologies.
 
-Link the official website (exvram.pro) in the GitHub repository to avoid confusion
+Link the official website exvram.pro in the GitHub repository to avoid confusion
 
 Current verified milestone:
 
