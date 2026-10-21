@@ -151,6 +151,7 @@ QTIP is a GPLv3 research reference only. No GPL code is copied into this Apache-
 - `search/` — future allocation and runtime search policies.
 - `experiments/search/` — bounded target configuration search spaces; planned curve inputs live under `experiments/residency/` and `experiments/kv_cache/`.
 - `custom/` — first-party low-level boundary, intentionally minimal.
+- `cpp/cuda_launch/` — Windows launcher for the CUDA llama-server recipe. It does not add a kernel.
 - `tests/` — CPU unit tests. GPU-only behavior skips or reports unavailable when CUDA is absent.
 - `docs/` — architecture, GPU environment, measured P1/P2 results, and the research plan.
 
@@ -192,6 +193,8 @@ ruff check .
 ```
 
 `run-synthetic-microbenchmark` writes `synthetic: true` and does not report tokens/second. It checks the workflow, not model inference.
+
+On Windows, `cpp/cuda_launch` starts the same llama-server placement the benchmarks use and keeps the decoder on CUDA0. Build and run steps are in [cpp/cuda_launch/README.md](cpp/cuda_launch/README.md). Model weights and `llama-server.exe` stay outside Git.
 
 `run-layer-benchmark` times real CUDA kernels when a CUDA build of Torch is installed. Without CUDA it must not invent tok/s. Isolated GPU environments used for the recorded layer results are `.venv-gpu` (Torch and GemLite) and `.venv-exllama` (ExLlamaV3). Both are gitignored. Recreate them only when you intend to measure; CPU tests do not need them. See [docs/GPU_ENVIRONMENT.md](docs/GPU_ENVIRONMENT.md).
 

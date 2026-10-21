@@ -1,0 +1,11 @@
+cmake_minimum_required(VERSION 3.20)
+project(exvram_cuda LANGUAGES CXX)
+
+add_executable(exvram-cuda main.cpp)
+target_compile_features(exvram-cuda PRIVATE cxx_std_20)
+if(MSVC)
+  target_compile_options(exvram-cuda PRIVATE /W4 /EHsc /utf-8)
+endif()
+if(WIN32)
+  target_link_libraries(exvram-cuda PRIVATE winhttp ws2_32)
+endif()
