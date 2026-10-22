@@ -1,0 +1,172 @@
+:root {
+  color-scheme: dark;
+  --bg: #141618;
+  --panel: #1c1f22;
+  --line: #2a2e32;
+  --text: #e6e1d8;
+  --muted: #8f897f;
+  --accent: #d4a054;
+  --danger: #d37a62;
+  font-family: "Segoe UI", system-ui, sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+}
+
+body {
+  min-height: 100vh;
+  padding: 16px 16px 24px;
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+.mark {
+  margin: 0;
+  color: var(--accent);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+h1 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 560;
+  letter-spacing: -0.03em;
+}
+
+h2 {
+  margin: 0 0 8px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.header-actions { display: flex; gap: 6px; }
+
+button, select, input {
+  font: inherit;
+  color: var(--text);
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+button {
+  padding: 7px 10px;
+  cursor: pointer;
+}
+
+button:hover { border-color: #4a4338; }
+
+button.primary {
+  background: var(--accent);
+  color: #1a140c;
+  border-color: transparent;
+  font-weight: 650;
+}
+
+button.text {
+  background: transparent;
+  border-color: transparent;
+  color: var(--muted);
+  padding: 6px 8px;
+}
+
+button.text.active { color: var(--text); }
+
+button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.notice {
+  min-height: 18px;
+  margin: 10px 0 12px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.notice.warn { color: var(--danger); }
+
+section {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 12px;
+  margin-bottom: 10px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px 12px;
+}
+
+.cell span, .row span {
+  display: block;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.cell strong, .row strong {
+  font-size: 13px;
+  font-weight: 560;
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 4px 0;
+  border-top: 1px solid var(--line);
+}
+
+.row:first-of-type { border-top: 0; }
+
+.actions, .choices, .presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.presets button[aria-pressed="true"] {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+label {
+  display: block;
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+input, select { width: 100%; padding: 7px 8px; }
+
+.models button {
+  display: block;
+  width: 100%;
+  text-align: left;
+  margin-top: 6px;
+}
+
+.models button small {
+  display: block;
+  color: var(--muted);
+}
+
+.hidden { display: none; }

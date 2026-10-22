@@ -20,6 +20,8 @@ Current verified milestone:
 
 The 31.39 tok/s figure is the short-context FULL_GPU decode. The 30.10 tok/s figure is the repeated occupied-8192 median. Neither is a quality result.
 
+ExVRAM Control is a separate local panel in `control/`. It starts and stops llama.cpp, reads this recipe, and does not replace the lab. See [docs/CONTROL.md](docs/CONTROL.md).
+
 The product path from here is that same UD-IQ2_XXS + q4_0 KV recipe, in three phases. P9 is quality and refusal, including a finished Coletti imatrix and IQ2_XXS. P10 splits prefill, time to first token, and decode, then closes the KV matrix before any speculative decoding. P11 is a thin runtime over the existing backend and a Hugging Face card, not a new engine and not a git weight commit. Details are in [docs/ROADMAP.md](docs/ROADMAP.md). P8 stays frozen on `experiment/p8-low-bit`.
 
 ## Research goals
