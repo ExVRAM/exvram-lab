@@ -1,6 +1,12 @@
 import unittest
 
-from exvram.breakpoint import count_classes, math_failure_class, missing_long_context
+from exvram.breakpoint import (
+    count_classes,
+    math_failure_class,
+    minimum_long_correct,
+    missing_long_context,
+)
+from exvram.p9_eval import aggregate_score, quality_verdict
 
 
 def _row(prediction: str, gold: str, correct: bool, predicted_n: int = 100, n_predict: int = 768):
@@ -40,3 +46,26 @@ class BreakpointTests(unittest.TestCase):
         self.assertEqual(len(missing), 44)
         self.assertNotIn("needle:2048:0", missing)
         self.assertIn("needle:8192:14", missing)
+
+    def test_q4_aggregate_floor_needs_36_of_45(self):
+        finished = {
+            "reasoning_score": 29 / 60,
+            "math_score": 71 / 100,
+            "coding_score": 12 / 40,
+            "factual_score": 67 / 100,
+            "instruction_score": 41 / 50,
+        }
+        reference = {
+            "reasoning_score": 29 / 60,
+            "math_score": 81 / 100,
+            "coding_score": 13 / 40,
+            "factual_score": 72 / 100,
+            "instruction_score": 43 / 50,
+            "long_context_score": 1.0,
+        }
+        needed = minimum_long_correct(finished, aggregate_score(reference))
+        self.assertEqual(needed, 36)
+        for correct, verdict in ((35, "FAIL"), (36, "PASS")):
+            candidate = dict(finished)
+            candidate["long_context_score"] = correct / 45
+            self.assertEqual(quality_verdict(candidate, reference), verdict)

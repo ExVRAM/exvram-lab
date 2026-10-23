@@ -19,7 +19,7 @@ against 2B BF16 and not a ratio against 27B Q4.
 | 2B Q4_K_M short suite, 350 rows | Measured. Same prompt SHA-256 as BF16 on every short id. No summary row |
 | 2B Q4_K_M long context | Partial: 20/45 stored, all 20 correct. 25 needles are absent |
 | Q5, Q3, IQ3 | Not run |
-| LONGTASK-V1 | Not run. The spec and scorers are now in `src/exvram/longtask.py` |
+| LONGTASK-V1 | Not run. Spec in [LONGTASK_V1.md](LONGTASK_V1.md), scorer in `src/exvram/longtask_v1.py` |
 | 27B Q4 | Not run. The published file is larger than this card |
 
 Q4 weights: `Qwen3.5-2B-Q4_K_M.gguf`, 1,280,835,840 bytes, SHA-256
@@ -139,43 +139,93 @@ A head-only lift of `output.weight` from `q3_k` to `q4_k` fits the derived
 16k spare. Embeddings and the `iq1_s` body do not. That recipe is not a
 measured quality gain. See [QUANT_PROVENANCE.md](QUANT_PROVENANCE.md).
 
+## Aggregate gate for the missing needles
+
+Checked against `aggregate_score` and `quality_verdict` in
+`src/exvram/p9_eval.py`, using the stored counts. BF16 aggregate is
+0.699722. The locked 0.90 ratio is 0.62975. Q4's five finished accuracies
+are fixed. Long context is the unweighted mean of the three lengths, which
+equals correct/45 because each length has 15 items.
+
+| Long-context correct | Q4 aggregate | Share of BF16 | Point verdict |
+|---:|---:|---:|---|
+| 35/45 | 0.626852 | 0.896 | FAIL |
+| 36/45 | 0.630556 | 0.901 | PASS |
+
+36 is the smallest total that passes. The category floor for long context
+is 0.75 of BF16's 45/45, which 34/45 already clears. The aggregate is the
+tighter rule. The 20 stored needles are all correct, so 36/45 means at
+least 16 of the remaining 25 must be correct. That is a point estimate.
+It is not equivalence, and it does not replace the paired interval.
+
+The five finished categories already clear their own point floors:
+reasoning 29/29 of BF16, math 71/81, coding 12/13, factual 67/72,
+instruction 41/43. Math's paired Wald interval on the finished 100 items
+stays entirely below zero (−0.176 to −0.024). The point floor can pass
+while the arm is still statistically below BF16. Q3 and Q5 stay unstarted
+until the 25 rows exist.
+
+## Resume command, not started
+
+The JSONL ids were checked on 2026-10-23. All 370 stored Q4 rows have
+`measurement_status` `measured`. The missing ids are exactly
+`needle:4096:5` through `needle:4096:14` and `needle:8192:0` through
+`needle:8192:14`. The same command that wrote the 370 rows skips those
+ids and appends each new row before the next one. Generation caps, chat
+mode, temperature, seed, and the embedding override stay as they were.
+No second model was started while this note was written.
+
+Host check the same evening, before any launch: RTX 5060, 8151 MiB total,
+1343 MiB used, 6554 MiB free, GPU utilization 1%, 39 C. Physical RAM
+16310 MiB with 4497 MiB free. Commit limit 31670 MiB with 13501 MiB free.
+Drive E: 280 GB free. `llama-server.exe` was not running. The runner
+refuses a desktop launch when background VRAM is above 2048 MiB; 1343 is
+under that line. The recorded Q4 CUDA weight buffer is 1211.05 MiB at
+context 8448, not a traced peak of the quality run. Free VRAM of 6554 MiB
+covers that buffer with margin. This check is not permission to start.
+
+```powershell
+.\.venv\Scripts\python.exe benchmark\run_p9_quality.py --server E:\ExVRAM\.cache\llama\runtime-b10982-cuda13.4\llama-server.exe --model E:\ExVRAM\models\qwen35-2b\Qwen3.5-2B-Q4_K_M.gguf --model-sha256 aaf42c8b7c3cab2bf3d69c355048d4a0ee9973d48f16c731c0520ee914699223 --model-role qwen35_2b_q4_k_m --output experiments/results/p9_qwen35_2b_q4.jsonl --long-output experiments/results/p9_qwen35_2b_q4_long.jsonl --work-dir work/p9-2b-q4 --server-extra=--override-tensor --server-extra=token_embd.weight=CUDA0
+```
+
+Do not delete the partial JSONL. Do not add `--allow-contended-gpu`.
+The 27B Q4 file stays unloaded.
+
 ## Next run, not started
 
-Finish the 25 missing Q4 needles, then stop. Do not start Q3 or Q5 until
-that arm has a six-category aggregate. The runner skips sample ids already
-marked `measured`. Missing ids:
-
-`needle:4096:5` through `needle:4096:14`, and `needle:8192:0` through
-`needle:8192:14`.
-
-Q4_K_M on this 2B file is a CUDA buffer of about 1211 MiB at context 8448.
-That is inside the 8151 MiB card. It still needs a free-RAM check and an
-explicit go-ahead before llama-server starts. The 27B Q4 file stays
-unloaded.
+Finish those 25 needles, then stop. If the finished point verdict is
+`PASS`, the next quant to prepare is Q3_K_M. If it is `FAIL`, prepare
+Q5_K_M. Neither file is fetched or launched here. A point `PASS` would
+still leave math below BF16 on the paired interval, so it would not mean
+the formats are equivalent. The one IQ2 follow-up, after Q4 and not
+instead of it, is a second pass of the stored repetition-class GSM8K ids
+at the same temperature, seed, and 768 cap, to see whether the same line
+repeats. That does not change sampling and does not name a tensor.
 
 ## Answers
 
-1. Ready before this note: the 27B IQ2 suite, its error table, the full
-   2B BF16/IQ2 pair, and the full 2B Q8 GPU pair. Q4's short suite was
-   already on disk and had not been judged.
-2. Best measured quality per byte on this card's 2B ladder is Q8: aggregate
-   0.693 against BF16 0.700. Q4 may land in the same band. Its protocol
-   aggregate is unfinished.
-3. The measured break is between Q8 and IQ2. Q4 is not the break until
-   the missing needles exist.
-4. 2B IQ2 math fails by repetition and by never emitting `####`, under
-   the same launch as the arms that do emit it.
-5. On the five finished categories, Q4 matches BF16 reasoning exactly
-   and drops math from 81 to 71. The six-category distance is not measured.
-6. A full long task has not been run. The needle task is not that test.
-7. There is no scored long-task trace, so there is no first failing step.
-8. At 2k, 4k, and 8k the BF16 and Q8 needles are 15/15. IQ2 loses one
-   code digit at 4k and one at 8k. Q4 has no 8k rows.
-9. 27B IQ2's weak absolute cells are coding and two reasoning tasks.
-   The 2B repetition collapse is not what the 27B math rows show.
-10. No measured change keeps the 27B weights and raises those cells
-    inside the same 7767 MiB peak.
-11. Waiting on permission: the 25 Q4 needles. After that, Q3_K_M if the
-    Q4 aggregate stays inside the locked ratios, otherwise Q5_K_M.
-    LONGTASK-V1 on 2B is the task battery after the quant ladder moves.
-12. The single next measurement is those 25 Q4 needles.
+1. The 395 Q4 rows are not complete. 370 are measured. 25 needles are absent.
+2. Q4 has no six-category aggregate. 35/45 long-context correct would be
+   0.627 and would fail the 0.90 floor. 36/45 would be 0.631 and would pass
+   that floor on the point estimate.
+3. The point gate is not decided. The five finished categories clear their
+   own floors. Long context does not have a score yet.
+4. On the finished math items, the paired interval lies entirely below zero.
+   The other four finished intervals cross zero. That is not a six-category
+   call.
+5. Recorded CUDA weight buffers, not suite peaks: Q8 1908.35 MiB, Q4
+   1211.05 MiB, a difference of 697.3 MiB. File sizes differ by the same
+   697.3 MiB. A traced peak for the Q4 quality run was not stored.
+6. The lowest completed arm that clears the aggregate point floor is Q8_0
+   (0.693, share 0.991). Its coding interval still straddles the 0.85 ratio.
+   IQ2 does not clear the floor. Q4 is not a candidate until the tail exists.
+7. Do not choose Q3 or Q5 yet. Q3_K_M is the proposal only if the finished
+   Q4 point verdict is `PASS`. Q5_K_M is the proposal if it is `FAIL`.
+8. 2B IQ2 math loops: 84 of 94 wrong rows hit 768, and the repetition class
+   is absent from the wrong BF16, Q8, and Q4 math rows. No tensor is identified.
+9. Still required: the 25 Q4 needles, then the paired interval on the full
+   arm. A repeat of the IQ2 repetition ids is the loop check after that.
+   LONGTASK-V1 stays unscored. Suite peak VRAM and TTFT were not stored.
+10. For 27B, the useful next fact is whether 2B Q4 still clears the locked
+    floors. A 27B Q4 file does not fit this card, and the 2B loop is not
+    what the 27B math rows show. No 27B weight edit is justified yet.
