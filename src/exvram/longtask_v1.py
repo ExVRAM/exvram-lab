@@ -212,3 +212,85 @@ def task_report(task: str, checks: Mapping[str, bool]) -> dict[str, object]:
         "n": len(checks),
         "checks": dict(checks),
     }
+
+
+LEDGER_PROMPT = """\
+Write three Python modules and nothing else.
+
+ledger/money.py
+def parse_cents(text) -> int
+Read a money string as cents. 12.30 is 1230, $1,000.00 is 100000, -2.50 is -250, and 0.05 is 5.
+
+ledger/book.py
+class Book
+post(account, cents) adds integer cents to that account.
+balance(account) is 0 when the account has no posts.
+total() sums the accounts.
+Two Book instances do not share state.
+Account names are case-sensitive.
+
+ledger/report.py
+def format_line(account, cents) -> str
+Render the account, a space, and a signed decimal with two digits.
+1230 is "cash 12.30", -250 is "cash -2.50", 5 is "cash 0.05", and 0 is "cash 0.00".
+"""
+
+DOCUMENT_PROMPT = """\
+Read the permit. Reply with one KEY: value line for each requested key.
+Use the amended capacity, not the original 120.
+Fee is 40 per person at the amended capacity.
+Early fee is that fee after a 10 percent discount.
+The deposit stays refundable in the sentence about the closed exit.
+Do not answer what happens to the deposit after the cancellation date; that sentence is not a key.
+
+Keys: PERMIT, CAPACITY, FEE, EARLY_FEE, DUE, EARLY_PAY, CURFEW,
+REHEARSAL_UNTIL, REHEARSAL_DATE, VENDOR, CATERING, DEPOSIT,
+DEPOSIT_REFUNDABLE, CONTACT, LOAD_IN, SPEAKERS, RETURNS, CANCEL_BEFORE.
+
+""" + DOCUMENT
+
+ROUTE_SOURCE = """\
+Orders start at A=10, B=7, C=4.
+The truck holds 12 crates and the rule is largest-first.
+The amendment cancels C, adds 5 crates to B, sets the truck to 15,
+and replaces the rule with smallest-first.
+Each trip starts with an empty truck.
+A crate count of 0 is not shipped.
+Unload only the crates that trip carried.
+"""
+
+ROUTE_PROMPT = """\
+Apply the amendment, then reply with one KEY: value line for each requested key.
+
+Keys: CANCELLED, A_QTY, B_QTY, C_QTY, TRUCK, RULE, TRIP1, TRIP2,
+TRIP_COUNT, LEFTOVER, C_SHIPPED, OLD_TRUCK_USED, LARGEST_FIRST_USED,
+UNLOADED_A, UNLOADED_B, FINAL.
+
+""" + ROUTE_SOURCE
+
+PILOT_ARMS = ("qwen35_2b_bf16", "qwen35_2b_q8_0_gpu", "qwen35_2b_q4_k_m")
+PILOT_LAUNCH = False
+
+
+def pilot_plan() -> dict[str, object]:
+    """Natural-length LONGTASK pilot. This does not start a model."""
+    return {
+        "protocol": PROTOCOL_ID,
+        "launch": PILOT_LAUNCH,
+        "representative_benchmark": False,
+        "arms": PILOT_ARMS,
+        "tasks": {
+            "ledger": LEDGER_PROMPT,
+            "document": DOCUMENT_PROMPT,
+            "route": ROUTE_PROMPT,
+        },
+        "checks": {
+            "ledger": 18,
+            "document": len(DOCUMENT_LINES),
+            "route": len(ROUTE_LINES),
+        },
+        "context": "natural",
+        "padded_contexts_later": CONTEXT_TOKENS,
+        "decoding": {"temperature": 0, "seed": 42},
+        "output": "experiments/results/longtask_v1_pilot.jsonl",
+    }

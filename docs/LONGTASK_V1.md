@@ -74,6 +74,29 @@ Sixteen keys: `CANCELLED`, `A_QTY`, `B_QTY`, `C_QTY`, `TRUCK`, `RULE`,
 negative keys are the values `no`. Shipping C, keeping truck 12, or keeping
 largest-first fails those checks.
 
+## Criteria check
+
+The checker has 18 ledger checks, 18 document keys, and 16 route keys.
+Fee 40 times amended capacity 96 is 3840. A 10 percent discount of that
+fee is 3456. Amended B is 7 plus 5, so 12. A is the smaller crate count
+and fits in an empty truck of 15; B does not fit in the remaining 5, so
+trip 1 is A and trip 2 is B.
+
+The permit says the deposit stays refundable because the east exit is
+closed, and also says the deposit is kept after 2026-10-30. No key asks
+for that second sentence. `DEPOSIT_REFUNDABLE: yes` does not score it.
+
+These three tasks can show a failure mode. They are not a sample size
+for a quality verdict.
+
+## Pilot, not started
+
+After the Q4 tail exists, a natural-length pilot on BF16, Q8, and Q4 is
+described by `pilot_plan()`. It does not start a model. Padded contexts
+2048, 4096, and 8192 stay a later stage. IQ2 is not in this pilot.
+The output file would be `experiments/results/longtask_v1_pilot.jsonl`,
+separate from the P9 logs.
+
 ## What a later run must record
 
 For each arm, task, and context length: the check map, passed/n, whether

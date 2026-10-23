@@ -2,10 +2,16 @@ import unittest
 
 from exvram.longtask_v1 import (
     CONTEXT_TOKENS,
+    DOCUMENT,
     DOCUMENT_LINES,
+    LEDGER_PROMPT,
     MODEL_RUN,
+    PILOT_LAUNCH,
     PROTOCOL_ID,
     ROUTE_LINES,
+    ROUTE_PROMPT,
+    ROUTE_SOURCE,
+    pilot_plan,
     score_labeled,
     score_ledger,
     task_report,
@@ -91,3 +97,22 @@ class LongTaskV1Tests(unittest.TestCase):
         self.assertEqual(report["model_run"], "NOT_RUN")
         self.assertEqual(report["passed"], 1)
         self.assertEqual(report["n"], 2)
+
+    def test_criteria_match_the_written_facts(self):
+        self.assertIn("capacity is 96", DOCUMENT)
+        self.assertIn("40 per person", DOCUMENT)
+        self.assertEqual(dict(DOCUMENT_LINES)["FEE"], str(40 * 96))
+        self.assertEqual(dict(DOCUMENT_LINES)["EARLY_FEE"], str(3840 * 9 // 10))
+        self.assertIn("adds 5 crates to B", ROUTE_SOURCE)
+        self.assertEqual(dict(ROUTE_LINES)["B_QTY"], "12")
+        self.assertEqual(dict(ROUTE_LINES)["TRIP1"], "A")
+        self.assertIn("parse_cents", LEDGER_PROMPT)
+        self.assertIn("smallest-first", ROUTE_PROMPT)
+
+    def test_pilot_is_not_a_benchmark_and_does_not_launch(self):
+        plan = pilot_plan()
+        self.assertFalse(PILOT_LAUNCH)
+        self.assertFalse(plan["launch"])
+        self.assertFalse(plan["representative_benchmark"])
+        self.assertEqual(plan["checks"], {"ledger": 18, "document": 18, "route": 16})
+        self.assertNotIn("iq2", plan["arms"])

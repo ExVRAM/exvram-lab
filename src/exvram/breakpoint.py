@@ -6,6 +6,8 @@ import re
 from collections import Counter
 from typing import Any, Mapping
 
+from .p9_eval import QUALITY_PASS, aggregate_score
+
 _NUMBER = re.compile(r"-?[0-9][0-9,]*(?:\.[0-9]+)?")
 LONG_LENGTHS = (2048, 4096, 8192)
 LONG_PER_LENGTH = 15
@@ -63,6 +65,31 @@ def count_classes(rows: list[Mapping[str, Any]]) -> dict[str, int]:
         label = math_failure_class(row)
         counts[label] = counts.get(label, 0) + 1
     return counts
+
+
+def minimum_long_correct(
+    finished: Mapping[str, float],
+    reference_aggregate: float,
+    long_n: int = 45,
+) -> int | None:
+    """Smallest long-context correct count that meets the locked aggregate ratio."""
+    if long_n <= 0 or reference_aggregate <= 0:
+        return None
+    floor = QUALITY_PASS["aggregate_min_ratio"] * reference_aggregate
+    keys = (
+        "reasoning_score",
+        "math_score",
+        "coding_score",
+        "factual_score",
+        "instruction_score",
+    )
+    for correct in range(long_n + 1):
+        scores = {key: finished[key] for key in keys}
+        scores["long_context_score"] = correct / long_n
+        aggregate = aggregate_score(scores)
+        if aggregate is not None and aggregate >= floor:
+            return correct
+    return None
 
 
 def missing_long_context(sample_ids: set[str]) -> list[str]:
