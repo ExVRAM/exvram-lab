@@ -1,0 +1,135 @@
+{
+  "point_verdict": "PASS",
+  "study_verdict": "INCONCLUSIVE",
+  "gate_calls": {
+    "reasoning_score": "INSIDE_MARGIN",
+    "math_score": "INSIDE_MARGIN",
+    "coding_score": "STRADDLES_MARGIN",
+    "factual_score": "INSIDE_MARGIN",
+    "instruction_score": "INSIDE_MARGIN",
+    "long_context_score": "INSIDE_MARGIN",
+    "aggregate": "INSIDE_MARGIN"
+  },
+  "bf16_aggregate": 0.6997222222222222,
+  "candidate_aggregate": 0.6933333333333334,
+  "aggregate_delta": -0.006388888888888888,
+  "aggregate_bootstrap95": [
+    -0.03111111111111109,
+    0.018611111111111245
+  ],
+  "aggregate_threshold": -0.06997222222222221,
+  "categories": {
+    "reasoning_score": {
+      "n": 60,
+      "ref_correct": 29,
+      "cand_correct": 30,
+      "ref_only": 1,
+      "cand_only": 2,
+      "delta": 0.016666666666666666,
+      "wald95": [
+        -0.03975523645910961,
+        0.07308856979244295
+      ],
+      "required_ratio": 0.85,
+      "delta_threshold": -0.07250000000000001,
+      "wald_call": "INSIDE_MARGIN",
+      "point_ratio": 1.0344827586206897
+    },
+    "math_score": {
+      "n": 100,
+      "ref_correct": 81,
+      "cand_correct": 78,
+      "ref_only": 8,
+      "cand_only": 5,
+      "delta": -0.03,
+      "wald95": [
+        -0.10042246330196151,
+        0.04042246330196152
+      ],
+      "required_ratio": 0.75,
+      "delta_threshold": -0.2025,
+      "wald_call": "INSIDE_MARGIN",
+      "point_ratio": 0.9629629629629629
+    },
+    "coding_score": {
+      "n": 40,
+      "ref_correct": 13,
+      "cand_correct": 14,
+      "ref_only": 1,
+      "cand_only": 2,
+      "delta": 0.025,
+      "wald95": [
+        -0.059514569718647554,
+        0.10951456971864756
+      ],
+      "required_ratio": 0.85,
+      "delta_threshold": -0.04875000000000001,
+      "wald_call": "STRADDLES_MARGIN",
+      "point_ratio": 1.0769230769230769
+    },
+    "factual_score": {
+      "n": 100,
+      "ref_correct": 72,
+      "cand_correct": 69,
+      "ref_only": 4,
+      "cand_only": 1,
+      "delta": -0.03,
+      "wald95": [
+        -0.07342990077079173,
+        0.013429900770791724
+      ],
+      "required_ratio": 0.75,
+      "delta_threshold": -0.18,
+      "wald_call": "INSIDE_MARGIN",
+      "point_ratio": 0.9583333333333333
+    },
+    "instruction_score": {
+      "n": 50,
+      "ref_correct": 43,
+      "cand_correct": 42,
+      "ref_only": 2,
+      "cand_only": 1,
+      "delta": -0.02,
+      "wald95": [
+        -0.08766844843992949,
+        0.047668448439929484
+      ],
+      "required_ratio": 0.75,
+      "delta_threshold": -0.215,
+      "wald_call": "INSIDE_MARGIN",
+      "point_ratio": 0.9767441860465116
+    },
+    "long_context_score": {
+      "n": 45,
+      "ref_correct": 45,
+      "cand_correct": 45,
+      "ref_only": 0,
+      "cand_only": 0,
+      "delta": 0.0,
+      "wald95": [
+        0.0,
+        0.0
+      ],
+      "required_ratio": 0.75,
+      "delta_threshold": -0.25,
+      "wald_call": "INSIDE_MARGIN",
+      "point_ratio": 1.0
+    }
+  },
+  "bf16_scores": {
+    "reasoning_score": 0.48333333333333334,
+    "math_score": 0.81,
+    "coding_score": 0.325,
+    "factual_score": 0.72,
+    "instruction_score": 0.86,
+    "long_context_score": 1.0
+  },
+  "candidate_scores": {
+    "reasoning_score": 0.5,
+    "math_score": 0.78,
+    "coding_score": 0.35,
+    "factual_score": 0.69,
+    "instruction_score": 0.84,
+    "long_context_score": 1.0
+  }
+}
