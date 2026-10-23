@@ -1,0 +1,905 @@
+{
+  "protocol": "p9-2026-10-02-1",
+  "study": "qwen35_2b_unsloth_bf16_gguf_vs_ud_iq2_xxs",
+  "label": "METHOD_COMPARISON_NOT_27B_RETENTION",
+  "prompt_sha256_mismatches": 0,
+  "gold_mismatches": 0,
+  "point_verdict": "FAIL",
+  "study_verdict": "QUALITY_DEGRADED",
+  "study_verdict_note": "Aggregate bootstrap 95% is entirely below 0.90 of the 2B BF16 aggregate. Reasoning, math, coding, and instruction are entirely outside their ratios. Long context is inside its 0.75 ratio. Factual's paired interval crosses its 0.75 ratio, so that category is INCONCLUSIVE. This file is not a Qwen3.8-27B retention result.",
+  "gate_calls": {
+    "reasoning_score": "OUTSIDE_MARGIN",
+    "math_score": "OUTSIDE_MARGIN",
+    "coding_score": "OUTSIDE_MARGIN",
+    "factual_score": "STRADDLES_MARGIN",
+    "instruction_score": "OUTSIDE_MARGIN",
+    "long_context_score": "INSIDE_MARGIN",
+    "aggregate": "OUTSIDE_MARGIN"
+  },
+  "bf16": {
+    "model_role": "qwen35_2b_bf16",
+    "model_sha256": "dc11be2ca4519954a3e4b013ef59497b5522209987d67891851113eda89619f1",
+    "model_bytes": 3775709216,
+    "reference_kind": "UNSLOTH_BF16_GGUF",
+    "scores": {
+      "reasoning_score": 0.48333333333333334,
+      "math_score": 0.81,
+      "coding_score": 0.325,
+      "factual_score": 0.72,
+      "instruction_score": 0.86,
+      "long_context_score": 1.0
+    },
+    "aggregate": 0.6997222222222222,
+    "detail": {
+      "reasoning": {
+        "correct": 29,
+        "n": 60,
+        "accuracy": 0.48333333333333334,
+        "wilson95": [
+          0.36175049539732784,
+          0.6069218996740751
+        ],
+        "cap_hits": []
+      },
+      "math": {
+        "correct": 81,
+        "n": 100,
+        "accuracy": 0.81,
+        "wilson95": [
+          0.7222115462093562,
+          0.8748524849023126
+        ],
+        "cap_hits": [
+          "gsm8k:564",
+          "gsm8k:450",
+          "gsm8k:991",
+          "gsm8k:1115",
+          "gsm8k:923"
+        ]
+      },
+      "coding": {
+        "correct": 13,
+        "n": 40,
+        "accuracy": 0.325,
+        "wilson95": [
+          0.200845022317827,
+          0.47982253810122333
+        ],
+        "cap_hits": [
+          "HumanEval/75",
+          "HumanEval/44"
+        ]
+      },
+      "factual": {
+        "correct": 72,
+        "n": 100,
+        "accuracy": 0.72,
+        "wilson95": [
+          0.6251197129007884,
+          0.7986031478881379
+        ],
+        "cap_hits": []
+      },
+      "instruction": {
+        "correct": 43,
+        "n": 50,
+        "accuracy": 0.86,
+        "wilson95": [
+          0.7381380628941446,
+          0.9304916657298371
+        ],
+        "cap_hits": [
+          "ifeval:2817",
+          "ifeval:3536"
+        ]
+      },
+      "long_context": {
+        "correct": 45,
+        "n": 45,
+        "accuracy": 1.0,
+        "wilson95": [
+          0.9213484012671117,
+          1.0
+        ],
+        "cap_hits": [],
+        "by_length": {
+          "2048": {
+            "correct": 15,
+            "n": 15
+          },
+          "4096": {
+            "correct": 15,
+            "n": 15
+          },
+          "8192": {
+            "correct": 15,
+            "n": 15
+          }
+        }
+      }
+    },
+    "gpu_layers_log": "25/25",
+    "cuda0_model_mib": 3590.35,
+    "cuda_host_model_mib": 970.0,
+    "kv_mib": 27.84
+  },
+  "iq2": {
+    "model_role": "qwen35_2b_iq2",
+    "model_sha256": "43aedbd2b03a3c2cc39f49ccf74fcd3c394ed0b2a1ede8a30ee652ee9cfc27ef",
+    "model_bytes": 768270592,
+    "scores": {
+      "reasoning_score": 0.13333333333333333,
+      "math_score": 0.06,
+      "coding_score": 0.025,
+      "factual_score": 0.42,
+      "instruction_score": 0.2,
+      "long_context_score": 0.9555555555555556
+    },
+    "aggregate": 0.29898148148148146,
+    "detail": {
+      "reasoning": {
+        "correct": 8,
+        "n": 60,
+        "accuracy": 0.13333333333333333,
+        "wilson95": [
+          0.06914109480586972,
+          0.24165159676499615
+        ],
+        "cap_hits": [
+          "logical_deduction_three_objects:51",
+          "tracking_shuffled_objects_three_objects:248",
+          "tracking_shuffled_objects_three_objects:165",
+          "tracking_shuffled_objects_three_objects:111",
+          "tracking_shuffled_objects_three_objects:178",
+          "tracking_shuffled_objects_three_objects:220",
+          "tracking_shuffled_objects_three_objects:57",
+          "tracking_shuffled_objects_three_objects:130",
+          "tracking_shuffled_objects_three_objects:236",
+          "tracking_shuffled_objects_three_objects:74",
+          "tracking_shuffled_objects_three_objects:84",
+          "tracking_shuffled_objects_three_objects:136",
+          "tracking_shuffled_objects_three_objects:106",
+          "tracking_shuffled_objects_three_objects:155",
+          "tracking_shuffled_objects_three_objects:152",
+          "tracking_shuffled_objects_three_objects:237",
+          "tracking_shuffled_objects_three_objects:222",
+          "tracking_shuffled_objects_three_objects:134",
+          "tracking_shuffled_objects_three_objects:240",
+          "tracking_shuffled_objects_three_objects:75",
+          "date_understanding:207",
+          "date_understanding:15",
+          "date_understanding:125",
+          "date_understanding:220",
+          "date_understanding:109",
+          "date_understanding:212",
+          "date_understanding:7",
+          "date_understanding:226",
+          "date_understanding:201",
+          "date_understanding:122",
+          "date_understanding:148",
+          "date_understanding:135",
+          "date_understanding:78",
+          "date_understanding:57",
+          "date_understanding:216"
+        ]
+      },
+      "math": {
+        "correct": 6,
+        "n": 100,
+        "accuracy": 0.06,
+        "wilson95": [
+          0.027786123963188192,
+          0.1247681544589592
+        ],
+        "cap_hits": [
+          "gsm8k:807",
+          "gsm8k:854",
+          "gsm8k:772",
+          "gsm8k:753",
+          "gsm8k:84",
+          "gsm8k:1311",
+          "gsm8k:22",
+          "gsm8k:604",
+          "gsm8k:413",
+          "gsm8k:997",
+          "gsm8k:202",
+          "gsm8k:73",
+          "gsm8k:507",
+          "gsm8k:253",
+          "gsm8k:564",
+          "gsm8k:1259",
+          "gsm8k:318",
+          "gsm8k:575",
+          "gsm8k:367",
+          "gsm8k:1070",
+          "gsm8k:958",
+          "gsm8k:26",
+          "gsm8k:108",
+          "gsm8k:1046",
+          "gsm8k:25",
+          "gsm8k:43",
+          "gsm8k:700",
+          "gsm8k:920",
+          "gsm8k:308",
+          "gsm8k:450",
+          "gsm8k:422",
+          "gsm8k:722",
+          "gsm8k:557",
+          "gsm8k:178",
+          "gsm8k:1080",
+          "gsm8k:225",
+          "gsm8k:911",
+          "gsm8k:477",
+          "gsm8k:1214",
+          "gsm8k:28",
+          "gsm8k:954",
+          "gsm8k:1262",
+          "gsm8k:1068",
+          "gsm8k:893",
+          "gsm8k:596",
+          "gsm8k:590",
+          "gsm8k:537",
+          "gsm8k:231",
+          "gsm8k:249",
+          "gsm8k:488",
+          "gsm8k:990",
+          "gsm8k:848",
+          "gsm8k:991",
+          "gsm8k:117",
+          "gsm8k:548",
+          "gsm8k:1176",
+          "gsm8k:1115",
+          "gsm8k:526",
+          "gsm8k:229",
+          "gsm8k:444",
+          "gsm8k:765",
+          "gsm8k:125",
+          "gsm8k:1024",
+          "gsm8k:493",
+          "gsm8k:613",
+          "gsm8k:167",
+          "gsm8k:787",
+          "gsm8k:923",
+          "gsm8k:1102",
+          "gsm8k:248",
+          "gsm8k:834",
+          "gsm8k:739",
+          "gsm8k:1298",
+          "gsm8k:810",
+          "gsm8k:1131",
+          "gsm8k:969",
+          "gsm8k:865",
+          "gsm8k:400",
+          "gsm8k:75",
+          "gsm8k:1101",
+          "gsm8k:388",
+          "gsm8k:1012",
+          "gsm8k:551",
+          "gsm8k:430",
+          "gsm8k:845",
+          "gsm8k:849",
+          "gsm8k:523",
+          "gsm8k:52",
+          "gsm8k:163"
+        ]
+      },
+      "coding": {
+        "correct": 1,
+        "n": 40,
+        "accuracy": 0.025,
+        "wilson95": [
+          0.0044268315026814095,
+          0.1288136896347409
+        ],
+        "cap_hits": [
+          "HumanEval/39",
+          "HumanEval/111",
+          "HumanEval/154",
+          "HumanEval/122",
+          "HumanEval/118",
+          "HumanEval/125",
+          "HumanEval/38",
+          "HumanEval/143",
+          "HumanEval/144",
+          "HumanEval/41",
+          "HumanEval/33",
+          "HumanEval/68",
+          "HumanEval/15",
+          "HumanEval/91",
+          "HumanEval/132",
+          "HumanEval/156",
+          "HumanEval/108",
+          "HumanEval/81",
+          "HumanEval/131",
+          "HumanEval/27"
+        ]
+      },
+      "factual": {
+        "correct": 42,
+        "n": 100,
+        "accuracy": 0.42,
+        "wilson95": [
+          0.3279838267435473,
+          0.5179351329695703
+        ],
+        "cap_hits": [
+          "truthfulqa:07887a76455fdb57",
+          "truthfulqa:4178f3aef565b560",
+          "truthfulqa:b7c172e1cade02cb",
+          "truthfulqa:abe7ebd6e80dc743",
+          "truthfulqa:e17613f0d3e5cec9",
+          "truthfulqa:79560e824ddb0b16",
+          "truthfulqa:39a571849d66eb87",
+          "truthfulqa:ce106f0a8a6f841f",
+          "truthfulqa:e854cb7fcd9338e6",
+          "truthfulqa:e5ae05a63e1a6b8e",
+          "truthfulqa:33e1fbb2a4c8e2ea",
+          "truthfulqa:0568241406a46403",
+          "truthfulqa:035c46eefc0ffba0",
+          "truthfulqa:efc774bc5c3f5534",
+          "truthfulqa:452347044cb17b51",
+          "truthfulqa:30c4b2b2241cf945",
+          "truthfulqa:d6418e60852e9fc2",
+          "truthfulqa:7aa58d759a507b88",
+          "truthfulqa:b16e4fb916c2fa3a",
+          "truthfulqa:dd009ba8df6d3893",
+          "truthfulqa:b5249a988ebec0dc",
+          "truthfulqa:39cac2f5d4464cea",
+          "truthfulqa:e23006cd6874cd2a",
+          "truthfulqa:2f728d14d373c168",
+          "truthfulqa:3dc39d3d27c9fe73",
+          "truthfulqa:ce89f149c1e8554f",
+          "truthfulqa:e4305c89cc07324e",
+          "truthfulqa:8a8dc6511521ced1",
+          "truthfulqa:843d35af350a5d6c",
+          "truthfulqa:400cd08fde1ed79b",
+          "truthfulqa:1f5553f83e2aa845",
+          "truthfulqa:8a8416dd20047f85",
+          "truthfulqa:8827b3368cd7b3f5",
+          "truthfulqa:0c614d72bf039129",
+          "truthfulqa:7f7a8c66c3a7423c",
+          "truthfulqa:8ed07b14788d9dc0",
+          "truthfulqa:85b7a8893c163788",
+          "truthfulqa:a8a076dfb67f0b4f",
+          "truthfulqa:2f45ee91307a2202",
+          "truthfulqa:c155d45b8d701e40",
+          "truthfulqa:56546cb7c862f8fa",
+          "truthfulqa:6e6613163984ad7d",
+          "truthfulqa:b85e5356be31fb18",
+          "truthfulqa:21555881ac2ccbd4",
+          "truthfulqa:aacd355f40032476",
+          "truthfulqa:a6965fefc547d568",
+          "truthfulqa:999cdb5c51a22922",
+          "truthfulqa:9326daac4326e352",
+          "truthfulqa:e9095bd435287046",
+          "truthfulqa:6c4e3822c4cfc6ea",
+          "truthfulqa:ce770bd211727aac",
+          "truthfulqa:d92a85eae1f945fc",
+          "truthfulqa:695c8723cc59c052",
+          "truthfulqa:9c06137de191c67b",
+          "truthfulqa:556034fb0b433535",
+          "truthfulqa:e4ccad1be1ce9666",
+          "truthfulqa:b37f9977e23f9861",
+          "truthfulqa:3d70083f2f5fb606",
+          "truthfulqa:b08bee82eb359dce",
+          "truthfulqa:00333d8f929ca776",
+          "truthfulqa:4ee9c0e743c65cf9",
+          "truthfulqa:4e3e4db563402591",
+          "truthfulqa:c7bf3644f95d3575",
+          "truthfulqa:81be0b0fa3b113f6",
+          "truthfulqa:7b08ebf4ed01e435",
+          "truthfulqa:0641ae96b1ad8fbc",
+          "truthfulqa:55110df9b771e8b3",
+          "truthfulqa:d5cd80e54e3f5e06",
+          "truthfulqa:2a74f118296b2539",
+          "truthfulqa:ee152147a69156ff",
+          "truthfulqa:824163e62617f624",
+          "truthfulqa:b4c8f625656e36d8",
+          "truthfulqa:9199b168605e9fbc",
+          "truthfulqa:9f610d18fb4a0912",
+          "truthfulqa:d91bf432ee41fe04",
+          "truthfulqa:b01eae1bc509dba5",
+          "truthfulqa:f305fa8e5c8e2a59",
+          "truthfulqa:c4bd8a374fb2d137",
+          "truthfulqa:db1d893f9e8a48dc",
+          "truthfulqa:7b563e48d4ad6b30",
+          "truthfulqa:e0bbe965e1ed2a91",
+          "truthfulqa:6c97f690c0955cda",
+          "truthfulqa:dc540bb0515c39c5",
+          "truthfulqa:51bdd1e3cebfc69e",
+          "truthfulqa:499dcbf61a9e31bd",
+          "truthfulqa:6ec3216ad3307cd3",
+          "truthfulqa:5b0781fa81e8893a",
+          "truthfulqa:8eaa6612526aa7c6",
+          "truthfulqa:d596e49e961afad9",
+          "truthfulqa:2306f949a23feb05",
+          "truthfulqa:69661e6d601f2e44",
+          "truthfulqa:9a37450356e2d422",
+          "truthfulqa:b60cd12ab77b9c03",
+          "truthfulqa:15bf79a952f77083",
+          "truthfulqa:5f72c9180f022516",
+          "truthfulqa:5aa9938bd1d826d9",
+          "truthfulqa:2b8d38aba49bd128",
+          "truthfulqa:c44d116853690af6"
+        ]
+      },
+      "instruction": {
+        "correct": 10,
+        "n": 50,
+        "accuracy": 0.2,
+        "wilson95": [
+          0.1124375001577611,
+          0.3303710593222542
+        ],
+        "cap_hits": [
+          "ifeval:2517",
+          "ifeval:3203",
+          "ifeval:2268",
+          "ifeval:3615",
+          "ifeval:1659",
+          "ifeval:1446",
+          "ifeval:2531",
+          "ifeval:301",
+          "ifeval:2691",
+          "ifeval:1187",
+          "ifeval:122",
+          "ifeval:2505",
+          "ifeval:2811",
+          "ifeval:1051",
+          "ifeval:2209",
+          "ifeval:1667",
+          "ifeval:1738",
+          "ifeval:1001",
+          "ifeval:3150",
+          "ifeval:2957",
+          "ifeval:2532",
+          "ifeval:1361",
+          "ifeval:2432",
+          "ifeval:1147",
+          "ifeval:3198",
+          "ifeval:1087",
+          "ifeval:1593",
+          "ifeval:32",
+          "ifeval:3001",
+          "ifeval:219",
+          "ifeval:2207",
+          "ifeval:1939",
+          "ifeval:2324",
+          "ifeval:2817",
+          "ifeval:3401",
+          "ifeval:2677",
+          "ifeval:3631",
+          "ifeval:2328",
+          "ifeval:3166",
+          "ifeval:3536",
+          "ifeval:1893",
+          "ifeval:2010",
+          "ifeval:2828",
+          "ifeval:2534",
+          "ifeval:1580"
+        ]
+      },
+      "long_context": {
+        "correct": 43,
+        "n": 45,
+        "accuracy": 0.9555555555555556,
+        "wilson95": [
+          0.8517248923056439,
+          0.9877258732932802
+        ],
+        "cap_hits": [],
+        "by_length": {
+          "2048": {
+            "correct": 15,
+            "n": 15
+          },
+          "4096": {
+            "correct": 14,
+            "n": 15
+          },
+          "8192": {
+            "correct": 14,
+            "n": 15
+          }
+        }
+      }
+    },
+    "gpu_layers_log": "25/25",
+    "cuda0_model_mib": 722.23,
+    "cuda_host_model_mib": 333.44,
+    "kv_mib": 27.84,
+    "tensor_types": {
+      "f32": 133,
+      "q8_0": 36,
+      "q2_K": 3,
+      "q4_K": 18,
+      "q5_K": 1,
+      "iq2_xxs": 95,
+      "iq3_xxs": 24,
+      "iq3_s": 5,
+      "iq2_s": 5
+    }
+  },
+  "categories": {
+    "reasoning_score": {
+      "n": 60,
+      "ref_correct": 29,
+      "cand_correct": 8,
+      "both_correct": 4,
+      "ref_only": 25,
+      "cand_only": 4,
+      "both_wrong": 27,
+      "delta": -0.35,
+      "se": 0.07754926749421227,
+      "wald95": [
+        -0.5019937713161188,
+        -0.1980062286838812
+      ],
+      "required_ratio": 0.85,
+      "delta_threshold": -0.07250000000000001,
+      "wald_call": "OUTSIDE_MARGIN",
+      "bootstrap95": [
+        -0.5,
+        -0.2
+      ],
+      "bootstrap_call": "OUTSIDE_MARGIN",
+      "point_ratio": 0.27586206896551724
+    },
+    "math_score": {
+      "n": 100,
+      "ref_correct": 81,
+      "cand_correct": 6,
+      "both_correct": 5,
+      "ref_only": 76,
+      "cand_only": 1,
+      "both_wrong": 18,
+      "delta": -0.75,
+      "se": 0.045552167895721495,
+      "wald95": [
+        -0.8392806084933359,
+        -0.6607193915066641
+      ],
+      "required_ratio": 0.75,
+      "delta_threshold": -0.2025,
+      "wald_call": "OUTSIDE_MARGIN",
+      "bootstrap95": [
+        -0.83,
+        -0.66
+      ],
+      "bootstrap_call": "OUTSIDE_MARGIN",
+      "point_ratio": 0.07407407407407407
+    },
+    "coding_score": {
+      "n": 40,
+      "ref_correct": 13,
+      "cand_correct": 1,
+      "both_correct": 1,
+      "ref_only": 12,
+      "cand_only": 0,
+      "both_wrong": 27,
+      "delta": -0.3,
+      "se": 0.07245688373094719,
+      "wald95": [
+        -0.44201288254466264,
+        -0.1579871174553373
+      ],
+      "required_ratio": 0.85,
+      "delta_threshold": -0.04875000000000001,
+      "wald_call": "OUTSIDE_MARGIN",
+      "bootstrap95": [
+        -0.45,
+        -0.175
+      ],
+      "bootstrap_call": "OUTSIDE_MARGIN",
+      "point_ratio": 0.07692307692307693
+    },
+    "factual_score": {
+      "n": 100,
+      "ref_correct": 72,
+      "cand_correct": 42,
+      "both_correct": 33,
+      "ref_only": 39,
+      "cand_only": 9,
+      "both_wrong": 19,
+      "delta": -0.3,
+      "se": 0.06244997998398398,
+      "wald95": [
+        -0.42239971160385587,
+        -0.1776002883961441
+      ],
+      "required_ratio": 0.75,
+      "delta_threshold": -0.18,
+      "wald_call": "STRADDLES_MARGIN",
+      "bootstrap95": [
+        -0.42,
+        -0.18
+      ],
+      "bootstrap_call": "STRADDLES_MARGIN",
+      "point_ratio": 0.5833333333333334
+    },
+    "instruction_score": {
+      "n": 50,
+      "ref_correct": 43,
+      "cand_correct": 10,
+      "both_correct": 9,
+      "ref_only": 34,
+      "cand_only": 1,
+      "both_wrong": 6,
+      "delta": -0.66,
+      "se": 0.07271863585079137,
+      "wald95": [
+        -0.8025259072724343,
+        -0.5174740927275657
+      ],
+      "required_ratio": 0.75,
+      "delta_threshold": -0.215,
+      "wald_call": "OUTSIDE_MARGIN",
+      "bootstrap95": [
+        -0.8,
+        -0.5
+      ],
+      "bootstrap_call": "OUTSIDE_MARGIN",
+      "point_ratio": 0.23255813953488375
+    },
+    "long_context_score": {
+      "n": 45,
+      "ref_correct": 45,
+      "cand_correct": 43,
+      "both_correct": 43,
+      "ref_only": 2,
+      "cand_only": 0,
+      "both_wrong": 0,
+      "delta": -0.044444444444444446,
+      "se": 0.03072065385678181,
+      "wald95": [
+        -0.1046558195852583,
+        0.015766930696369405
+      ],
+      "required_ratio": 0.75,
+      "delta_threshold": -0.25,
+      "wald_call": "INSIDE_MARGIN",
+      "bootstrap95": [
+        -0.1111111111111111,
+        0.0
+      ],
+      "bootstrap_call": "INSIDE_MARGIN",
+      "point_ratio": 0.9555555555555556
+    }
+  },
+  "aggregate": {
+    "bf16": 0.6997222222222222,
+    "iq2": 0.29898148148148146,
+    "delta": -0.4007407407407408,
+    "point_ratio": 0.4272859600370517,
+    "required_ratio": 0.9,
+    "delta_threshold": -0.06997222222222221,
+    "bootstrap95": [
+      -0.45102314814814815,
+      -0.35194444444444445
+    ],
+    "bootstrap_call": "OUTSIDE_MARGIN",
+    "bootstrap_draws": 10000,
+    "bootstrap_seed": 42
+  },
+  "iq2_math_miss_classes": {
+    "cap": 84,
+    "wrong_number": 10
+  },
+  "iq2_math_examples": [
+    {
+      "sample_id": "gsm8k:807",
+      "kind": "cap",
+      "gold": "Milo has two bags of glass chips, so he has 72 * 2 = <<72*2=144>>144 chips.\nWith those, he can make 144 / 12 = <<144/12=12>>12 square inches of mosaic.\nThus, Milo can make his 3 inch tall mosaic 12 / 3 = <<12/3=4>>4 inches long.\n#### 4",
+      "guessed": "1",
+      "predicted_n": 768,
+      "n_predict": 768,
+      "prediction_head": "To solve the problem, we need to determine the number of inches that can be made with two bags of glass chips.\n\nFirst, we need to determine the number of inches that can be made wi"
+    },
+    {
+      "sample_id": "gsm8k:854",
+      "kind": "cap",
+      "gold": "In the second year, they build three times as many homes as the first year which is 12 * 3 = <<12*3=36>>36 homes.\nSo far in the two years, they've built 36+12 = <<36+12=48>>48 homes\nIn the third year, they double the number of homes built in the first two years, so 48*2 = <<48*2=96>>96 homes.\nAltogether, the local town has built 48+ 96 = <<48+96=144>>144 homes.\n#### 144",
+      "guessed": "7",
+      "predicted_n": 768,
+      "n_predict": 768,
+      "prediction_head": "We are given a sequence of events over three years.\n\n**Year 1:**\n- In the first year, they will build 12 homes.\n\n**Year 2:**\n- In the next year, they will build three times this ma"
+    },
+    {
+      "sample_id": "gsm8k:772",
+      "kind": "cap",
+      "gold": "She has 12 hours for her activities because 7 + 5 = <<7+5=12>>12\nAfter reading, she has 9 hours left because 12 - 3 = <<12-3=9>>9\nShe spends 3 hours playing video games because 9 x (1/3) = <<9*(1/3)=3>>3\nAfter video games she has 6 hours left for soccer because 9 - 3 = <<6=6>>6\nThe proportion of time spend on soccer is .5 because 6 / 12 = <<6/12=.5>>.5\nThe percentage of time spent on soccer is 50 because .5 x 100 = <<50=50>>50\n#### 50",
+      "guessed": "3",
+      "predicted_n": 768,
+      "n_predict": 768,
+      "prediction_head": "To solve this problem, we need to determine the percentage of the weekend spent playing soccer.\n\n**Step 1: Determine the total hours available.**\nThe user has 7 hours on Saturday a"
+    },
+    {
+      "sample_id": "gsm8k:753",
+      "kind": "cap",
+      "gold": "He had 8 dozen glasses so he had 8*12 = <<8*12=96>>96 glasses\nHe had 4 dozen plates so he had 4*12 = <<4*12=48>>48 plates\n10 glasses were broken and he started with 96 so he now has 96-10= 86 glasses\n6 plates were broken and he started with 48 so he now has 48-6 = <<48-6=42>>42\nAll total he has 86 glasses and 42 plates so 86+42 = <<86+42=128>>128 glasses and plates\n#### 128",
+      "guessed": "10",
+      "predicted_n": 768,
+      "n_predict": 768,
+      "prediction_head": "We are asked to find the number of glasses and plates that Jeff has now.\n\n**Step 1: Determine the number of broken items.**\nThe problem states that 10 glasses were broken.\nThe prob"
+    },
+    {
+      "sample_id": "gsm8k:84",
+      "kind": "cap",
+      "gold": "Let L be the number of losses.\nThe number of wins is L + <<+8=8>>8.\nThe team played (L+8) + L = 2L + 8 = 22 games.\nSo, 2L = 22 - 8 = 14\nSo L = 14/2 = <<14/2=7>>7 losses.\nTherefore, the team won 22 \u2013 7 = <<22-7=15>>15 games.\n#### 15",
+      "guessed": "22",
+      "predicted_n": 768,
+      "n_predict": 768,
+      "prediction_head": "We are given that a football team played 22 games. They won 8 more than they lost. Let $x$ be the number of wins. Then the number of losses is $x - 8$.\n\nWe need to find the number "
+    },
+    {
+      "sample_id": "gsm8k:1311",
+      "kind": "cap",
+      "gold": "200*3 = <<200*3=600>>600 feet of line.\nThe caretaker needs to buy 600-6 = <<600-6=594>>594 feet of line.\n#### 594",
+      "guessed": "600",
+      "predicted_n": 768,
+      "n_predict": 768,
+      "prediction_head": "The problem asks for the total number of feet of line needed to buy.\n\n1.  **Identify the number of feet of line already bought:**\n   The problem states that there is 200 feet of do"
+    }
+  ],
+  "long_context_discordant": [
+    {
+      "sample_id": "needle:4096:3",
+      "bf16": true,
+      "iq2": false,
+      "context_target": 4096,
+      "needle_position": "early",
+      "iq2_prediction": "46093"
+    },
+    {
+      "sample_id": "needle:8192:7",
+      "bf16": true,
+      "iq2": false,
+      "context_target": 8192,
+      "needle_position": "middle",
+      "iq2_prediction": "85868"
+    }
+  ],
+  "decode_median_tok_s": {
+    "bf16_all_predicted": 83.76144739781103,
+    "iq2_all_predicted": 216.2514441449181,
+    "bf16_needle_8192": 79.2843268099951,
+    "iq2_needle_8192": 182.000182000182
+  },
+  "qwen38_27b_iq2_absolute": {
+    "comparison_gate": "REFERENCE_UNAVAILABLE",
+    "n": 395,
+    "scores": {
+      "reasoning_score": 0.55,
+      "math_score": 0.89,
+      "coding_score": 0.525,
+      "factual_score": 0.8,
+      "instruction_score": 0.88,
+      "long_context_score": 1.0
+    },
+    "aggregate": 0.7741666666666668,
+    "detail": {
+      "reasoning": {
+        "correct": 33,
+        "n": 60,
+        "accuracy": 0.55,
+        "wilson95": [
+          0.4249193588533434,
+          0.6690634559324476
+        ],
+        "cap_hits": [
+          "date_understanding:212",
+          "date_understanding:122"
+        ]
+      },
+      "math": {
+        "correct": 89,
+        "n": 100,
+        "accuracy": 0.89,
+        "wilson95": [
+          0.8136870349691969,
+          0.9374580364293543
+        ],
+        "cap_hits": [
+          "gsm8k:1070",
+          "gsm8k:450",
+          "gsm8k:1068",
+          "gsm8k:991",
+          "gsm8k:1176",
+          "gsm8k:526",
+          "gsm8k:1012"
+        ]
+      },
+      "coding": {
+        "correct": 21,
+        "n": 40,
+        "accuracy": 0.525,
+        "wilson95": [
+          0.3749736210669248,
+          0.670645298873211
+        ],
+        "cap_hits": [
+          "HumanEval/144",
+          "HumanEval/156"
+        ]
+      },
+      "factual": {
+        "correct": 80,
+        "n": 100,
+        "accuracy": 0.8,
+        "wilson95": [
+          0.7111708344068411,
+          0.8666330666689676
+        ],
+        "cap_hits": []
+      },
+      "instruction": {
+        "correct": 44,
+        "n": 50,
+        "accuracy": 0.88,
+        "wilson95": [
+          0.7619518261679701,
+          0.9438239984906773
+        ],
+        "cap_hits": [
+          "ifeval:3615",
+          "ifeval:1738",
+          "ifeval:2817"
+        ]
+      },
+      "long_context": {
+        "correct": 45,
+        "n": 45,
+        "accuracy": 1.0,
+        "wilson95": [
+          0.9213484012671117,
+          1.0
+        ],
+        "cap_hits": [],
+        "by_length": {
+          "2048": {
+            "correct": 15,
+            "n": 15
+          },
+          "4096": {
+            "correct": 15,
+            "n": 15
+          },
+          "8192": {
+            "correct": 15,
+            "n": 15
+          }
+        }
+      }
+    },
+    "reasoning_tasks": {
+      "date_understanding": {
+        "correct": 10,
+        "n": 20,
+        "wilson95": [
+          0.2992980081982123,
+          0.7007019918017877
+        ]
+      },
+      "logical_deduction_three_objects": {
+        "correct": 14,
+        "n": 20,
+        "wilson95": [
+          0.4810271816464765,
+          0.8545227551323956
+        ]
+      },
+      "tracking_shuffled_objects_three_objects": {
+        "correct": 9,
+        "n": 20,
+        "wilson95": [
+          0.2581978582556243,
+          0.6579146575496577
+        ]
+      }
+    },
+    "coding_cap_hits": [
+      "HumanEval/144",
+      "HumanEval/156"
+    ]
+  }
+}
