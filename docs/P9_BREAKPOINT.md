@@ -1,8 +1,10 @@
 # P9 quality breakpoint
 
-Status: **partial**. No model was started for this note. The numbers below
-are counts of rows already stored under protocol `p9-2026-10-02-1`.
-Empty cells were not measured. The locked pass ratios were not changed.
+Status: **Q4 tail measured** on 2026-10-24. Protocol `p9-2026-10-02-1`
+is unchanged. The point-estimate call for 2B Q4_K_M against the stored
+2B BF16 arm is `PASS`. The paired-interval call is `INCONCLUSIVE`.
+That is not `ZERO_LOSS` and not `QUALITY_PRESERVED_WITHIN_MARGIN`.
+Empty cells were not measured.
 
 Study label for the 2B rows: `METHOD_COMPARISON_NOT_27B_RETENTION`.
 The 27B IQ2 file is a different network. Its scores are not a ratio
@@ -16,10 +18,9 @@ against 2B BF16 and not a ratio against 27B Q4.
 | 27B error table | Measured classes in [P9_ERROR_ANALYSIS.md](P9_ERROR_ANALYSIS.md). No BF16 arm |
 | 2B BF16 vs UD-IQ2_XXS, same ids | Measured. Call `QUALITY_DEGRADED`. See [P9_QWEN35_2B_PAIR.md](P9_QWEN35_2B_PAIR.md) |
 | 2B Q8_0, embedding on CUDA0 | Measured. Point estimate `PASS`, aggregate 0.693 vs BF16 0.700 |
-| 2B Q4_K_M short suite, 350 rows | Measured. Same prompt SHA-256 as BF16 on every short id. No summary row |
-| 2B Q4_K_M long context | Partial: 20/45 stored, all 20 correct. 25 needles are absent |
+| 2B Q4_K_M, 395 rows | Measured. The 370 stored rows were kept. The 25 missing needles were appended on 2026-10-24, all correct. One summary row |
 | Q5, Q3, IQ3 | Not run |
-| LONGTASK-V1 | Not run. The spec and scorers are now in `src/exvram/longtask.py` |
+| LONGTASK-V1 | Not run. Spec in [LONGTASK_V1.md](LONGTASK_V1.md), scorer in `src/exvram/longtask_v1.py` |
 | 27B Q4 | Not run. The published file is larger than this card |
 
 Q4 weights: `Qwen3.5-2B-Q4_K_M.gguf`, 1,280,835,840 bytes, SHA-256
@@ -30,14 +31,14 @@ factual 16, instruction 768.
 
 ## Measured 2B scores
 
-Six-category aggregate uses the unweighted mean. Q4 has no six-category
-aggregate because 25 long-context rows are missing.
+Six-category aggregate uses the unweighted mean. Q4 now has one:
+0.663889, which is 0.949 of the BF16 aggregate 0.699722.
 
 | Format | File bytes | Reasoning | Math | Coding | Factual | Instruction | Long context | Aggregate |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|
 | BF16 GGUF | 3,775,709,216 | 29/60 | 81/100 | 13/40 | 72/100 | 43/50 | 45/45 | 0.700 |
 | Q8_0 GPU | 2,012,012,800 | 30/60 | 78/100 | 14/40 | 69/100 | 42/50 | 45/45 | 0.693 |
-| Q4_K_M | 1,280,835,840 | 29/60 | 71/100 | 12/40 | 67/100 | 41/50 | 20/20 stored, 25 absent | |
+| Q4_K_M | 1,280,835,840 | 29/60 | 71/100 | 12/40 | 67/100 | 41/50 | 45/45 | 0.664 |
 | IQ2_XXS | 768,270,592 | 8/60 | 6/100 | 1/40 | 42/100 | 10/50 | 43/45 | 0.299 |
 | Q5_K_M | | | | | | | | |
 | Q3_K_M | | | | | | | | |
@@ -66,18 +67,24 @@ instruction 2/50, reasoning 0/60, factual 0/100.
 
 Q8 stays inside the locked aggregate ratio of 0.90 (share 0.991). Coding
 on Q8 still straddles its own 0.85 ratio. IQ2 falls outside the aggregate
-interval. Q4's finished categories sit near BF16. Paired Wald 95% intervals on
-Q4 minus BF16: reasoning −0.092 to +0.092, math −0.176 to −0.024,
-coding −0.110 to +0.060, factual −0.108 to +0.008, instruction −0.150
-to +0.070. Math is the only closed cell whose interval lies entirely
-below zero. The others cross zero. That is not a six-category call.
+interval. Paired Wald 95% intervals on Q4 minus BF16, all 395 ids:
+reasoning −0.092 to +0.092, math −0.176 to −0.024, coding −0.110 to
++0.060, factual −0.108 to +0.008, instruction −0.150 to +0.070, long
+context 0 to 0. Math is entirely below zero and still above its −0.2025
+margin, so that category is `INSIDE_MARGIN` and also statistically below
+BF16. Reasoning and coding cross their locked ratios
+(`STRADDLES_MARGIN`). The 10,000-draw paired bootstrap of the aggregate
+difference, seed 42, is −0.068333 to −0.003889. The locked aggregate
+drop is −0.069972, so that interval is `INSIDE_MARGIN` and entirely
+below zero. `paired_study` therefore returns point `PASS` and study
+`INCONCLUSIVE`.
 
 ```mermaid
 xychart-beta
     title "2B six-category aggregate, measured arms only"
-    x-axis ["BF16", "Q8", "IQ2"]
+    x-axis ["BF16", "Q8", "Q4", "IQ2"]
     y-axis "Aggregate" 0 --> 1
-    bar [0.700, 0.693, 0.299]
+    bar [0.700, 0.693, 0.664, 0.299]
 ```
 
 ## Why 2B IQ2 scores 6/100 on GSM8K
@@ -120,7 +127,7 @@ Stored needles, actually filled:
 |---|---:|---:|---:|
 | BF16 | 15/15 | 15/15 | 15/15 |
 | Q8_0 GPU | 15/15 | 15/15 | 15/15 |
-| Q4_K_M | 15/15 | 5/15 | |
+| Q4_K_M | 15/15 | 15/15 | 15/15 |
 | IQ2 | 15/15 | 14/15 | 14/15 |
 
 The two IQ2 misses dropped the last digit of a 6-digit code and stopped
@@ -139,43 +146,86 @@ A head-only lift of `output.weight` from `q3_k` to `q4_k` fits the derived
 16k spare. Embeddings and the `iq1_s` body do not. That recipe is not a
 measured quality gain. See [QUANT_PROVENANCE.md](QUANT_PROVENANCE.md).
 
+## Aggregate gate
+
+Checked against `aggregate_score`, `quality_verdict`, and `paired_study`.
+BF16 aggregate is 0.699722. The locked 0.90 ratio is 0.62975. Before the
+tail, 36/45 was the smallest long-context total that could pass on the
+point estimate, and 35/45 failed. The finished file is 45/45.
+
+| Arm | Aggregate | Share of BF16 | Point verdict | Paired study |
+|---|---:|---:|---|---|
+| Q4_K_M | 0.663889 | 0.949 | PASS | INCONCLUSIVE |
+
+Point floors, Q4 over BF16: reasoning 29/29, math 71/81 (0.877),
+coding 12/13 (0.923), factual 67/72 (0.931), instruction 41/43 (0.953),
+long context 45/45. Every one clears its locked ratio. The paired
+intervals do not. Reasoning and coding cross their ratios. Math and the
+aggregate sit entirely below zero while remaining above their locked
+drops. Prompt SHA-256, gold, and decoding mismatches versus BF16 are 0
+on all 395 ids. Q3 and Q5 were not started.
+
+## Resume, finished
+
+The same command that wrote the 370 rows was started on 2026-10-24. It
+skipped ids already marked `measured` and appended the 25 needles
+`needle:4096:5` through `needle:4096:14` and `needle:8192:0` through
+`needle:8192:14`. Each new row is correct. The short file gained one
+summary row and no rewritten samples. Exit code 0. `llama-server` was
+not running after the process exited.
+
+The server log for this launch says 25/25 layers on CUDA0, weight buffer
+1211.05 MiB, KV 27.84 MiB, graph splits 1. The summary field `full_gpu`
+is false because the runner sets that flag only for `65/65`. This 2B
+file has 25 layers. One nvidia-smi snapshot during the run showed
+2407 MiB used, 5490 MiB free, 92% utilization, and 64 C, with 4418 MiB
+of RAM free. That is a snapshot, not a traced peak, and not a TTFT.
+Caps, chat mode, temperature 0, seed 42, and the embedding override were
+the original ones. `--allow-contended-gpu` was not passed. The 27B Q4
+file stayed unloaded.
+
+```powershell
+.\.venv\Scripts\python.exe benchmark\run_p9_quality.py --server E:\ExVRAM\.cache\llama\runtime-b10982-cuda13.4\llama-server.exe --model E:\ExVRAM\models\qwen35-2b\Qwen3.5-2B-Q4_K_M.gguf --model-sha256 aaf42c8b7c3cab2bf3d69c355048d4a0ee9973d48f16c731c0520ee914699223 --model-role qwen35_2b_q4_k_m --output experiments/results/p9_qwen35_2b_q4.jsonl --long-output experiments/results/p9_qwen35_2b_q4_long.jsonl --work-dir work/p9-2b-q4 --server-extra=--override-tensor --server-extra=token_embd.weight=CUDA0
+```
+
 ## Next run, not started
 
-Finish the 25 missing Q4 needles, then stop. Do not start Q3 or Q5 until
-that arm has a six-category aggregate. The runner skips sample ids already
-marked `measured`. Missing ids:
-
-`needle:4096:5` through `needle:4096:14`, and `needle:8192:0` through
-`needle:8192:14`.
-
-Q4_K_M on this 2B file is a CUDA buffer of about 1211 MiB at context 8448.
-That is inside the 8151 MiB card. It still needs a free-RAM check and an
-explicit go-ahead before llama-server starts. The 27B Q4 file stays
-unloaded.
+The point verdict is `PASS`, so the next quant to prepare is Q3_K_M.
+Q5_K_M is not the next file. Neither file is fetched or launched here.
+The point pass still leaves math and the aggregate below BF16 on their
+intervals, and reasoning and coding still straddle their ratios, so the
+formats are not equivalent. The one IQ2 follow-up, not started, is a
+second pass of the stored repetition-class GSM8K ids at the same
+temperature, seed, and 768 cap, to see whether the same line repeats.
+That does not change sampling and does not name a tensor.
 
 ## Answers
 
-1. Ready before this note: the 27B IQ2 suite, its error table, the full
-   2B BF16/IQ2 pair, and the full 2B Q8 GPU pair. Q4's short suite was
-   already on disk and had not been judged.
-2. Best measured quality per byte on this card's 2B ladder is Q8: aggregate
-   0.693 against BF16 0.700. Q4 may land in the same band. Its protocol
-   aggregate is unfinished.
-3. The measured break is between Q8 and IQ2. Q4 is not the break until
-   the missing needles exist.
-4. 2B IQ2 math fails by repetition and by never emitting `####`, under
-   the same launch as the arms that do emit it.
-5. On the five finished categories, Q4 matches BF16 reasoning exactly
-   and drops math from 81 to 71. The six-category distance is not measured.
-6. A full long task has not been run. The needle task is not that test.
-7. There is no scored long-task trace, so there is no first failing step.
-8. At 2k, 4k, and 8k the BF16 and Q8 needles are 15/15. IQ2 loses one
-   code digit at 4k and one at 8k. Q4 has no 8k rows.
-9. 27B IQ2's weak absolute cells are coding and two reasoning tasks.
-   The 2B repetition collapse is not what the 27B math rows show.
-10. No measured change keeps the 27B weights and raises those cells
-    inside the same 7767 MiB peak.
-11. Waiting on permission: the 25 Q4 needles. After that, Q3_K_M if the
-    Q4 aggregate stays inside the locked ratios, otherwise Q5_K_M.
-    LONGTASK-V1 on 2B is the task battery after the quant ladder moves.
-12. The single next measurement is those 25 Q4 needles.
+1. All 395 Q4 rows are measured. 350 short rows were already stored, 45
+   long-context rows are stored, and one summary row was appended.
+2. The Q4 six-category aggregate is 0.663889.
+3. The point estimate passes the locked floors: aggregate share 0.949,
+   and every category is above its own ratio. The paired study is
+   `INCONCLUSIVE`. That is not equivalence.
+4. Math is statistically below BF16: Wald −0.176 to −0.024. The aggregate
+   bootstrap is also entirely below zero: −0.068333 to −0.003889. Both
+   remain above their locked drops. Reasoning, coding, factual, and
+   instruction cross zero. Long context is 0.
+5. Recorded CUDA weight buffers, not suite peaks: Q8 1908.35 MiB, Q4
+   1211.05 MiB, a difference of 697.3 MiB. File sizes differ by the same
+   697.3 MiB. This launch logged the same 1211.05 MiB buffer. A traced
+   peak and a TTFT were not stored.
+6. The lowest completed arm whose point estimate clears the floors is
+   Q4_K_M. Its paired study is still `INCONCLUSIVE`. IQ2 does not clear
+   the floor. Q8 does, with coding still straddling 0.85.
+7. Prepare Q3_K_M. Do not launch it in this step. The paired study is
+   inconclusive even though the point estimate passes, so Q3 is the next
+   file to measure, not a claim that Q4 is equivalent to BF16.
+8. 2B IQ2 math loops: 84 of 94 wrong rows hit 768, and the repetition class
+   is absent from the wrong BF16, Q8, and Q4 math rows. No tensor is identified.
+   The same-flag repeat was not started.
+9. Still unmeasured: the IQ2 repetition repeat, LONGTASK-V1, a traced Q4
+   suite peak, TTFT, and Q3_K_M. The sample size stays locked.
+10. For 27B, 2B Q4 clears the point floors and IQ2 does not. That is not
+    27B retention. A 27B Q4 file does not fit this card, and the 2B loop
+    is not what the 27B math rows show. No 27B weight edit is justified.

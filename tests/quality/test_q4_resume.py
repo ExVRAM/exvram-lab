@@ -25,7 +25,7 @@ class Q4ResumeTests(unittest.TestCase):
         self.assertNotIn("needle:4096:4", gap)
 
     def test_plan_never_launches_and_defers_under_the_ram_floor(self):
-        ids = _long_ids()
+        ids = _historical_partial_ids()
         plan = q4_resume_plan(ids, ram_available_mib=1944)
         self.assertFalse(plan["launch"])
         self.assertEqual(plan["resource"], "defer")
@@ -34,6 +34,12 @@ class Q4ResumeTests(unittest.TestCase):
         ready = q4_resume_plan(ids, ram_available_mib=4283)
         self.assertEqual(ready["resource"], "within_floor")
         self.assertFalse(ready["launch"])
+
+    def test_finished_long_file_does_not_ask_for_another_launch(self):
+        plan = q4_resume_plan(_long_ids(), ram_available_mib=4283)
+        self.assertEqual(plan["missing"], [])
+        self.assertEqual(plan["outside_original_gap"], [])
+        self.assertFalse(plan["launch"])
 
     def test_q4_math_interval_is_entirely_below_zero(self):
         paired = _paired("math")
@@ -47,6 +53,16 @@ class Q4ResumeTests(unittest.TestCase):
         self.assertLess(interval["low"], 0)
         self.assertGreater(interval["high"], 0)
         self.assertEqual(interval["diff"], 0)
+
+
+def _historical_partial_ids() -> set[str]:
+    gap = set(original_q4_gap())
+    return {
+        f"needle:{length}:{index}"
+        for length in (2048, 4096, 8192)
+        for index in range(15)
+        if f"needle:{length}:{index}" not in gap
+    }
 
 
 def _long_ids() -> set[str]:
