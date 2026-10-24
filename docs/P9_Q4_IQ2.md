@@ -1,72 +1,79 @@
 # Q4 tail and the 2B IQ2 repetition
 
-Date: 2026-10-23. No llama-server process was started for this note.
-PR #15 (`feature/p9-quality-audit`) already recorded the stored-row audit,
-the partial Q4 suite, and the LONGTASK checker. This note does not rerun
-those 370 Q4 rows or the closed BF16, Q8, and IQ2 suites.
+The Q4 long-context tail finished on 2026-10-24 at 45/45. The 350 short
+rows were not rerun. Protocol `p9-2026-10-02-1` and the locked floors
+are unchanged: aggregate 0.90 of the reference, reasoning and coding
+0.85, every other category 0.75.
 
-Protocol `p9-2026-10-02-1` is unchanged. Locked floors stay aggregate
-0.90 of the reference, reasoning and coding 0.85, every other category
-0.75.
+The resume process used `--override-tensor token_embd.weight=CUDA0`.
+Its log says `offloaded 25/25`, CUDA0 buffer 1211.05 MiB, and
+`graph splits = 1`. The summary row records that extra. The earlier 350
+short rows and the first 20 needles do not record it. All 25 new needles
+are correct, and the earlier 20 were already correct. Prompt SHA-256 and
+gold match BF16 on all 395 ids.
 
-## 1. Q4 table, with the tail unfinished
+During that run, available RAM was 4217 MiB, VRAM used was 2402 MiB of
+8151, and GPU utilization was 92%. Afterwards the server was gone,
+available RAM was 5111 MiB, and VRAM used was 1069 MiB.
+
+## 1. Closed Q4 comparison
 
 Six-category aggregate is the unweighted mean of the six accuracies.
-Q4 does not have one. Q5 and Q3 were not run.
+Q5 and Q3 were not run.
 
 | Arm | Aggregate | Reasoning | Math | Coding | Factual | Instruction | Long context | File bytes |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|
 | BF16 | 0.700 | 29/60 | 81/100 | 13/40 | 72/100 | 43/50 | 45/45 | 3,775,709,216 |
 | Q8_0 GPU | 0.693 | 30/60 | 78/100 | 14/40 | 69/100 | 42/50 | 45/45 | 2,012,012,800 |
-| Q4_K_M |  | 29/60 | 71/100 | 12/40 | 67/100 | 41/50 | 20/45 | 1,280,835,840 |
+| Q4_K_M | 0.664 | 29/60 | 71/100 | 12/40 | 67/100 | 41/50 | 45/45 | 1,280,835,840 |
 | UD-IQ2_XXS | 0.299 | 8/60 | 6/100 | 1/40 | 42/100 | 10/50 | 43/45 | 768,270,592 |
 
-Suite peak VRAM, a separate TTFT, and a speed protocol are not in these
-rows. File size is the only size column filled from the rows.
-
-Finished aggregates, and no Q4 point:
+Q4 aggregate is 0.663889, which is 0.949 of BF16 0.699722. The point
+estimate `quality_verdict` is `PASS`. The paired study call is
+`INCONCLUSIVE` because the reasoning and coding intervals cross their
+locked margins. Suite peak VRAM is not in the rows. The load log's CUDA
+buffer is 1211.05 MiB.
 
 ```mermaid
 xychart-beta
     title "Six-category aggregate"
-    x-axis ["BF16", "Q8", "IQ2"]
+    x-axis ["BF16", "Q8", "Q4", "IQ2"]
     y-axis "Aggregate" 0 --> 1
-    bar [0.700, 0.693, 0.299]
+    bar [0.700, 0.693, 0.664, 0.299]
 ```
 
-The stored Q4 long-context file has `needle:2048:0`–`14` and
-`needle:4096:0`–`4`, all correct. The missing 25 ids are
-`needle:4096:5`–`14` and `needle:8192:0`–`14`. Prompt SHA-256 and gold
-match BF16 on all 370 shared ids.
+Paired Wald 95% on Q4 minus BF16. The margin is the locked ratio applied
+to the BF16 accuracy. The aggregate interval is a 10,000-draw paired
+bootstrap, seed 42, the same draw that reproduces the stored Q8
+aggregate low.
 
-Paired Wald 95% intervals on Q4 minus BF16, same ids:
+| Category | Q4 | BF16 | Delta | 95% interval | Margin | Call |
+|---|---:|---:|---:|---|---:|---|
+| Reasoning | 29/60 | 29/60 | 0.000 | −0.092 to +0.092 | −0.073 | STRADDLES_MARGIN |
+| Math | 71/100 | 81/100 | −0.100 | −0.176 to −0.024 | −0.203 | INSIDE_MARGIN |
+| Coding | 12/40 | 13/40 | −0.025 | −0.110 to +0.060 | −0.049 | STRADDLES_MARGIN |
+| Factual | 67/100 | 72/100 | −0.050 | −0.108 to +0.008 | −0.180 | INSIDE_MARGIN |
+| Instruction | 41/50 | 43/50 | −0.040 | −0.150 to +0.070 | −0.215 | INSIDE_MARGIN |
+| Long context | 45/45 | 45/45 | 0.000 | 0 to 0 | −0.250 | INSIDE_MARGIN |
+| Aggregate | 0.664 | 0.700 | −0.036 | −0.068 to −0.004 | −0.070 | INSIDE_MARGIN |
 
-| Category | Q4 | BF16 | Difference | 95% interval |
-|---|---:|---:|---:|---|
-| Reasoning | 29/60 | 29/60 | 0.000 | crosses zero |
-| Math | 71/100 | 81/100 | −0.100 | entirely below zero |
-| Coding | 12/40 | 13/40 | −0.025 | crosses zero |
-| Factual | 67/100 | 72/100 | −0.050 | crosses zero |
-| Instruction | 41/50 | 43/50 | −0.040 | crosses zero |
-| Long context | 20 of 45 | 20 of 20 on the shared ids |  | 25 ids absent |
+Math is a real loss: the interval lies entirely below zero, and it is
+still inside the 0.75 floor. Seven of the 29 Q4 math misses hit the 768
+cap. None of those wrong answers repeat a 12-word window four times.
 
-Math is the only closed category whose interval lies entirely below zero.
-Seven of the 29 Q4 math misses hit the 768 cap. The other 22 finished.
-None of the Q4, Q8, or BF16 wrong math answers repeat a 12-word window
-four times. That is a different miss from the IQ2 loop.
+Needle medians from the Q4 rows. These answers are short, so prompt time
+is the TTFT. This is not a speed protocol.
 
-Given the five finished Q4 scores, the locked point-estimate aggregate
-needs at least 36/45 long-context answers correct (`minimum_long_correct`).
-Twenty are already correct, so at least 16 of the remaining 25 have to
-be correct before that point estimate can pass. The paired interval
-cannot be computed until those rows exist. A point estimate on the ratio
-is not a paired-interval call.
+| Filled context | Correct | Median prompt | Median decode |
+|---|---:|---:|---:|
+| 2048 | 15/15 | 7.68 s | 162.44 tok/s |
+| 4096 | 15/15 | 15.47 s | 159.99 tok/s |
+| 8192 | 15/15 | 31.56 s | 154.55 tok/s |
 
-`benchmark/plan_p9_next.py` prints the resume command and refuses
-`--launch`. The existing runner already skips ids marked `measured` and
-appends one row at a time, so a stopped tail can be continued. It must
-be pointed at the same two Q4 files. A new output file would rerun the
-370 finished ids.
+The pre-registered rule sends the next format to Q3_K_M. The point
+estimate passes, and the aggregate interval stays inside 0.90 of BF16.
+It does not send the next format to Q5. The bootstrap low, −0.068, sits
+just above the −0.070 floor. Q3 was not loaded.
 
 ## 2. Why the stored IQ2 answers repeat
 
@@ -180,24 +187,18 @@ The deposit sentence after 2026-10-30 is unscored. The pilot plan covers
 BF16, Q8, and Q4 at natural length after the Q4 tail, and it is not a
 benchmark. It was not run.
 
-## 6. Waiting on permission
+## 6. What is still open
 
-Resource sample while writing this note, no model loaded: available RAM
-4283 MiB, commit headroom 13583 MiB, VRAM 1330 MiB used and 6567 MiB
-free of 8151, GPU utilization 1%. No `llama-server` process. Available
-RAM is above the benchmark floor of 2048 MiB in
-[SYSTEM_RESOURCE_SAFETY.md](SYSTEM_RESOURCE_SAFETY.md). That sample is
-not permission to start.
-
-1. Resume the 25 Q4 needles with the command from `plan_p9_next.py`.
-2. After that aggregate exists, decide Q3 or Q5 from the locked ratios.
-3. Rerun the four IQ2 probe ids into a new JSONL, same flags.
-4. Natural-length LONGTASK pilot on BF16, Q8, and Q4.
+Q3_K_M is the next format under the locked rule. It was not downloaded
+and not loaded. The four-id IQ2 reproduction and the natural-length
+LONGTASK pilot on BF16, Q8, and Q4 have not been run.
 
 ## 7. Next hypothesis
 
 The 2B UD-IQ2_XXS file, under the shared protocol, decodes into an
 item-specific cycle often enough to hit the cap. A same-flag rerun of
-the four probe ids is the check. If the cycle returns on IQ2 only, the
-association with that file is replicated. Which tensor does it is still
-open, and it is not answered by transferring the 2B rate onto 27B.
+`gsm8k:807`, `gsm8k:548`, `gsm8k:450`, and `gsm8k:48` is the check. If
+the cycle returns, the association with that file is replicated. Which
+tensor does it is still open, and the 2B rate is not a 27B rate. Q4 on
+this same protocol does not show that cycle, and its six-category point
+estimate stays inside the locked floors.

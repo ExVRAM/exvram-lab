@@ -48,6 +48,13 @@ def math_loop_counts(rows: list[Mapping[str, object]]) -> dict[str, int]:
     return counts
 
 
+def gsm8k_prompt(question: str) -> str:
+    return (
+        question.rstrip()
+        + "\nSolve the problem. Put the final number on its own line as #### <number>."
+    )
+
+
 def probe_plan() -> dict[str, object]:
     """One-factor reproduction. The stored rows are the comparison, not this plan."""
     overlap = sorted(set(PROBE_IDS) & set(CONTROL_IDS))

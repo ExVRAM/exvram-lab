@@ -5,11 +5,13 @@ from pathlib import Path
 from exvram.iq2_loops import (
     CONTROL_IDS,
     PROBE_IDS,
+    gsm8k_prompt,
     loop_shape,
     math_loop_counts,
     probe_plan,
     twelve_gram,
 )
+from exvram.p9_eval import sha256_text
 
 RESULTS = Path(__file__).resolve().parents[2] / "experiments" / "results"
 
@@ -49,6 +51,17 @@ class Iq2LoopTests(unittest.TestCase):
             other = math_loop_counts(_math(name))
             self.assertEqual(other["short_cycle"], 0, name)
             self.assertEqual(other["repeated_phrase"], 0, name)
+
+    def test_probe_prompts_match_the_stored_iq2_rows(self):
+        dataset = RESULTS.parents[1] / "work" / "p9" / "datasets" / "gsm8k_test.jsonl"
+        if not dataset.is_file():
+            self.skipTest("local gsm8k cache is not in the repo")
+        stored = {row["sample_id"]: row for row in _math("p9_qwen35_2b_iq2.jsonl")}
+        lines = dataset.read_text(encoding="utf-8").splitlines()
+        for sample_id in PROBE_IDS:
+            question = json.loads(lines[int(sample_id.split(":")[1])])["question"]
+            digest = sha256_text(gsm8k_prompt(question))
+            self.assertEqual(digest, stored[sample_id]["prompt_sha256"])
 
 
 def _math(name: str) -> list[dict]:
