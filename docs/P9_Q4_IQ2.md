@@ -61,8 +61,8 @@ Math is a real loss: the interval lies entirely below zero, and it is
 still inside the 0.75 floor. Seven of the 29 Q4 math misses hit the 768
 cap. None of those wrong answers repeat a 12-word window four times.
 
-Needle medians from the Q4 rows. These answers are short, so prompt time
-is the TTFT. This is not a speed protocol.
+Needle medians from the Q4 rows. `prompt_ms` is prompt time. A separate
+TTFT was not stored. This is not a speed protocol.
 
 | Filled context | Correct | Median prompt | Median decode |
 |---|---:|---:|---:|
