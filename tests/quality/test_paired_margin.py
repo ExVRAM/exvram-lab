@@ -43,3 +43,16 @@ class PairedMarginTests(unittest.TestCase):
         self.assertEqual(study["aggregate_call"], "INSIDE_MARGIN")
         self.assertEqual(study["point_verdict"], "PASS")
         self.assertEqual(study["study_verdict"], "INCONCLUSIVE")
+
+    def test_local_q3_fails_the_locked_aggregate(self):
+        study = paired_study(
+            _rows("p9_qwen35_2b_bf16.jsonl", "p9_qwen35_2b_bf16_long.jsonl"),
+            _rows("p9_qwen35_2b_q3.jsonl", "p9_qwen35_2b_q3_long.jsonl"),
+        )
+        self.assertEqual(study["prompt_or_gold_mismatches"], 0)
+        categories = study["categories"]
+        self.assertEqual(categories["math"]["candidate_correct"], 58)
+        self.assertEqual(categories["long_context"]["candidate_correct"], 45)
+        self.assertEqual(study["aggregate_call"], "OUTSIDE_MARGIN")
+        self.assertEqual(study["point_verdict"], "FAIL")
+        self.assertEqual(study["study_verdict"], "OUTSIDE_MARGIN")

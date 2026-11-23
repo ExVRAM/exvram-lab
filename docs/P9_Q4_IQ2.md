@@ -187,18 +187,74 @@ The deposit sentence after 2026-10-30 is unscored. The pilot plan covers
 BF16, Q8, and Q4 at natural length after the Q4 tail, and it is not a
 benchmark. It was not run.
 
-## 6. What is still open
+## 6. IQ2 reproduction
 
-Q3_K_M is the next format under the locked rule. It was not downloaded
-and not loaded. The four-id IQ2 reproduction and the natural-length
-LONGTASK pilot on BF16, Q8, and Q4 have not been run.
+On 2026-11-23 the four frozen probe ids were rerun on the same IQ2 file,
+temperature 0, seed 42, cap 768, and no tensor override. All four missed
+again. The repeated 12-word window, its count, the token count, and the
+extracted number matched the stored row on every id:
 
-## 7. Next hypothesis
+| Id | Shape | Tokens | Extracted | Gold |
+|---|---|---:|---:|---:|
+| gsm8k:807 | repeated phrase | 768 | 1 | 4 |
+| gsm8k:548 | short cycle `67` | 768 | 67 | 100 |
+| gsm8k:450 | short cycle `Final answer` | 768 | 3 | 4 |
+| gsm8k:48 | finished wrong number | 134 | 6 | 8 |
 
-The 2B UD-IQ2_XXS file, under the shared protocol, decodes into an
-item-specific cycle often enough to hit the cap. A same-flag rerun of
-`gsm8k:807`, `gsm8k:548`, `gsm8k:450`, and `gsm8k:48` is the check. If
-the cycle returns, the association with that file is replicated. Which
-tensor does it is still open, and the 2B rate is not a 27B rate. Q4 on
-this same protocol does not show that cycle, and its six-category point
-estimate stays inside the locked floors.
+`gsm8k:807` repeated the same glass-chips sentence 34 times, and
+`gsm8k:548` repeated `67` 179 times, the same counts as the stored
+answers. Under this launch the failure is stable. The stored BF16, Q8,
+and Q4 rows for these prompts do not have that cycle. The row still does
+not name a tensor.
+
+## 7. Local Q3_K_M
+
+`llama-quantize` from the local BF16 file, build b10982, `--max-buffer-size 256`,
+4 threads, no imatrix. Quantized size reported as 1037.88 MiB. The file
+is 1,099,258,912 bytes, SHA-256
+`68fda7926fa1a67e797d333723796e5ea5dbdbbe80fe9244b9170a1b8445a899`.
+The Unsloth Q4, Q8, and IQ2 files used an imatrix that is not on this
+disk, so this Q3 is not the same recipe as those files. It is the next
+bit width made from the same BF16.
+
+The suite used the runner defaults: no embedding override. The log says
+`offloaded 25/25`, CUDA0 buffer 1037.88 MiB, `graph splits = 2`.
+Available RAM during the run stayed above 4 GiB. Wall time was 1313 s.
+Prompt SHA-256 and gold mismatches versus BF16 are 0.
+
+| Category | Q3 | BF16 | Delta | 95% interval | Call |
+|---|---:|---:|---:|---|---|
+| Reasoning | 17/60 | 29/60 | −0.200 | −0.359 to −0.041 | STRADDLES_MARGIN |
+| Math | 58/100 | 81/100 | −0.230 | −0.317 to −0.143 | STRADDLES_MARGIN |
+| Coding | 7/40 | 13/40 | −0.150 | −0.281 to −0.019 | STRADDLES_MARGIN |
+| Factual | 59/100 | 72/100 | −0.130 | −0.247 to −0.014 | STRADDLES_MARGIN |
+| Instruction | 38/50 | 43/50 | −0.100 | −0.239 to +0.039 | STRADDLES_MARGIN |
+| Long context | 45/45 | 45/45 | 0.000 | 0 to 0 | INSIDE_MARGIN |
+| Aggregate | 0.565 | 0.700 | −0.135 | −0.184 to −0.086 | OUTSIDE_MARGIN |
+
+Point-estimate `quality_verdict` is `FAIL`. The aggregate is 0.807 of
+BF16, below the locked 0.90. The bootstrap interval lies entirely under
+the −0.070 aggregate margin. Of 42 wrong math answers, 41 have no
+12-word loop and 1 repeats a phrase. Q3 misses by answering wrong, not
+by the IQ2 cycle. Long context remains 45/45.
+
+On this 2B ladder the last format that still passes the locked point
+floors is Q4_K_M. Q8 is the closer one to BF16. Both fit the 8 GB card.
+This Q3 does not pass. That does not assign the 0.807 ratio to 27B.
+
+## 8. Still open
+
+The natural-length LONGTASK pilot has not been run. An imatrix Q3 was
+not built, because that calibration file is not local. No tensor inside
+the IQ2 file has been isolated.
+
+## 9. Where the ladder stands
+
+The stable IQ2 cycle is a property of that file under the shared
+protocol. The locked quality floor on this 2B comparison fails at the
+local Q3_K_M point and still holds at Unsloth Q4_K_M. The highest
+measured quality that fits an 8 GB card on the 2B ladder is Q8_0.
+Q4_K_M is the smallest measured format that still passes the point
+floors. 27B Q4 still does not fit that card, and these 2B ratios are
+not a 27B result.
+
